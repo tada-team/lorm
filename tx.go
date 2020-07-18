@@ -77,14 +77,14 @@ func Atomic(fn func(tx *Tx) error) error {
 		if Debug.ShowSql {
 			log.Printf("%s rollback: %s", tx, err)
 		}
-		if err := tx.Rollback(); err != nil {
+		if err := tx.tx.Rollback(context.Background()); err != nil {
 			return errors.Wrapf(err, "%s rollback failed", tx)
 		}
 		return err
 	}
 
 	startCommit := time.Now()
-	if err := tx.Commit(); err != nil {
+	if err := tx.tx.Commit(context.Background()); err != nil {
 		return errors.Wrapf(err, "%s commit failed", tx)
 	}
 
