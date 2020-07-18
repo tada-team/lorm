@@ -1,7 +1,6 @@
 package lorm
 
 import (
-	"github.com/tada-team/lorm/db"
 	"github.com/tada-team/lorm/op"
 )
 
@@ -28,7 +27,7 @@ func (u BaseUpdater) DoSave(r Record, t op.Table) error {
 		kv[k] = args.Next(v)
 	}
 	query := op.Update(t, kv).Where(r.PkCond(&args))
-	if _, err := db.TxExec(r.Tx(), query, args); err != nil {
+	if _, err := TxExec(r.Tx(), query, args); err != nil {
 		return err
 	}
 	u.ch = make(op.Changes)

@@ -1,12 +1,11 @@
 package lorm
 
 import (
-	"github.com/tada-team/lorm/db"
 	"github.com/tada-team/lorm/op"
 )
 
 type Filter interface {
-	db.Transactional
+	Transactional
 	GetArgs() op.Args
 	GetConds() op.Conds
 	IsEmpty() bool
@@ -16,7 +15,7 @@ type Filter interface {
 }
 
 type BaseFilter struct {
-	db.BaseTransactional
+	BaseTransactional
 	Conds   op.Conds
 	Args    op.Args
 	empty   bool
@@ -32,7 +31,7 @@ func (f BaseFilter) GetLock() op.Lock    { return f.lock }
 func (f BaseFilter) GetOrderBy() op.Expr { return f.orderBy }
 func (f BaseFilter) GetLimit() int       { return f.limit }
 
-func (f *BaseFilter) SetOrderBy(v op.Expr)            { f.orderBy = v }
-func (f *BaseFilter) SetLimit(v int)                  { f.limit = v }
-func (f *BaseFilter) SetEmpty()                       { f.empty = true }
-func (f *BaseFilter) SetLock(tx *db.Tx, lock op.Lock) { f.SetTx(tx); f.lock = lock }
+func (f *BaseFilter) SetOrderBy(v op.Expr)         { f.orderBy = v }
+func (f *BaseFilter) SetLimit(v int)               { f.limit = v }
+func (f *BaseFilter) SetEmpty()                    { f.empty = true }
+func (f *BaseFilter) SetLock(tx *Tx, lock op.Lock) { f.SetTx(tx); f.lock = lock }

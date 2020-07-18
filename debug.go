@@ -1,4 +1,4 @@
-package db
+package lorm
 
 import (
 	"fmt"
@@ -9,10 +9,6 @@ import (
 
 	"github.com/tada-team/lorm/op"
 )
-
-var Debug struct {
-	ShowSql bool
-}
 
 type beforeQueryHandler func(tx *Tx, qNum int64, q string, v op.Args)
 type afterQueryHandler func(tx *Tx, qNum int64, q string, v op.Args, dur time.Duration)

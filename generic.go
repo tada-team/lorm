@@ -5,7 +5,6 @@ import (
 	"log"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/tada-team/lorm/db"
 	"github.com/tada-team/lorm/op"
 
 	"github.com/pkg/errors"
@@ -15,7 +14,7 @@ func DoCount(f Filter, table op.Table) int {
 	var res int
 	if !f.IsEmpty() {
 		query := op.Select(op.Count(table.Pk())).From(table).Where(f.GetConds())
-		err := db.TxScan(f.Tx(), query, f.GetArgs(), &res)
+		err := TxScan(f.Tx(), query, f.GetArgs(), &res)
 		if err != nil {
 			log.Panicln(errors.Wrapf(err, "%s.Count() fail on %s and %v", table, query, f.GetArgs()))
 		}
@@ -26,7 +25,7 @@ func DoCount(f Filter, table op.Table) int {
 func DoDeleteFiltered(f Filter, table op.Table) error {
 	if !f.IsEmpty() {
 		query := op.Delete(table).Where(f.GetConds())
-		if _, err := db.TxExec(f.Tx(), query, f.GetArgs()); err != nil {
+		if _, err := TxExec(f.Tx(), query, f.GetArgs()); err != nil {
 			return err
 		}
 	}
@@ -37,7 +36,7 @@ func DoExists(f Filter, table op.Table) bool {
 	var res bool
 	if !f.IsEmpty() {
 		query := op.RawQuery("SELECT", op.Exists(op.Select(op.One).From(table).Where(f.GetConds())))
-		err := db.TxScan(f.Tx(), query, f.GetArgs(), &res)
+		err := TxScan(f.Tx(), query, f.GetArgs(), &res)
 		if err != nil {
 			log.Panicln(errors.Wrapf(err, "%s.Exists() fail on %s and %v", table, query, f.GetArgs()))
 		}
@@ -63,11 +62,11 @@ func DoSaveall(err error, r Record, t op.Table) error {
 	}
 	if r.HasPk() {
 		query := op.Update(t, kv).Where(r.PkCond(&args))
-		_, err := db.TxExec(r.Tx(), query, args)
+		_, err := TxExec(r.Tx(), query, args)
 		return err
 	}
 	query := op.Insert(t, kv).Returning(t.Pk().BareName())
-	if err := db.TxScan(r.Tx(), query, args, values[0]); err != nil {
+	if err := TxScan(r.Tx(), query, args, values[0]); err != nil {
 		return err
 	}
 	if !r.HasPk() {
@@ -79,7 +78,7 @@ func DoSaveall(err error, r Record, t op.Table) error {
 func DoDelete(r Record, t op.Table) error {
 	args := op.NewArgs()
 	query := op.Delete(t).Where(r.PkCond(&args))
-	_, err := db.TxExec(r.Tx(), query, args)
+	_, err := TxExec(r.Tx(), query, args)
 	return err
 }
 
@@ -88,19 +87,19 @@ func DoGet(f Filter, r Record, t op.Table) (bool, error) {
 		return false, nil
 	}
 	query := op.Select().From(t).Where(f.GetConds()).Lock(f.GetLock()).OrderBy(f.GetOrderBy())
-	err := db.TxScan(f.Tx(), query, f.GetArgs(), r.GetAllFields()...)
+	err := TxScan(f.Tx(), query, f.GetArgs(), r.GetAllFields()...)
 	if err == sql.ErrNoRows {
 		return false, nil
 	}
 	if err != nil {
 		return false, err
 	}
-	db.MaybeAddToTx(f.Tx(), r)
+	MaybeAddToTx(f.Tx(), r)
 	return true, nil
 }
 
 func DoReload(r Record, t op.Table) error {
 	args := op.NewArgs()
 	query := op.Select().From(t).Where(r.PkCond(&args))
-	return db.TxScan(r.Tx(), query, args, r.GetAllFields()...)
+	return TxScan(r.Tx(), query, args, r.GetAllFields()...)
 }
