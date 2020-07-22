@@ -125,7 +125,7 @@ func retry(fn func() error) error {
 }
 
 func nonFatalError(err error) bool {
-	for _, s := range NotFatalErrors {
+	for _, s := range NonFatalErrors {
 		if strings.Contains(err.Error(), s) {
 			return true
 		}

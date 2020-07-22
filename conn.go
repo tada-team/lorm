@@ -13,13 +13,12 @@ var (
 var (
 	MaxAttempts    = 10
 	ShowSql        = false
-	NotFatalErrors = []string{
+	NonFatalErrors = []string{
 		"bad connection",
 		"broken pipe",
 		"connection refused",
 		"connection reset",
 		"missing destination name",
-		"open /opt/tada/cfg/yandex.crt",
 		"read-only transaction",
 		"the database system is in recovery mode",
 	}
