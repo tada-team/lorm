@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"log"
 
-	uuid "github.com/satori/go.uuid"
 	"github.com/tada-team/lorm/op"
+
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/pkg/errors"
 )
@@ -53,7 +54,7 @@ func DoSaveall(err error, r Record, t op.Table) error {
 	args := op.NewArgs()
 	for i, f := range t.GetAllFields() {
 		if i == 0 {
-			if f.BareName() == "uid" { // FIXME: hardcore
+			if f.BareName() == "uid" { // XXX:
 				kv[f] = args.Next(uuid.NewV4().String())
 			}
 		} else {

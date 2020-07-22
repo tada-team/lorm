@@ -3,6 +3,8 @@ package op
 import (
 	"fmt"
 	"strings"
+
+	"github.com/lib/pq"
 )
 
 type Args []interface{}
@@ -33,10 +35,6 @@ const (
 	Zero        = rawExpr("0")
 )
 
-type Placeholder string
-
-func (f Placeholder) String() string { return string(f) }
-
 func (args *Args) Next(v interface{}) Expr {
 	*args = append(*args, v)
 	return Placeholder(fmt.Sprintf("$%d", len(*args)))
@@ -45,6 +43,6 @@ func (args *Args) Next(v interface{}) Expr {
 type ArrayMask Placeholder
 
 func (args *Args) NextArray(v interface{}) ArrayMask {
-	*args = append(*args, v)
+	*args = append(*args, pq.Array(v))
 	return ArrayMask(fmt.Sprintf("$%d", len(*args)))
 }

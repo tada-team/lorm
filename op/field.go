@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+type Expr interface {
+	fmt.Stringer
+}
+
 type Column string
 
 const (
@@ -51,4 +55,25 @@ func (f Column) BareName() Column {
 		return Column(bits[1])
 	}
 	return f
+}
+
+type Placeholder string
+
+func (f Placeholder) String() string { return string(f) }
+
+type rawExpr string
+
+func (f rawExpr) String() string { return string(f) }
+
+func joinExpr(v []Expr, sep string) string {
+	if v == nil || len(v) == 0 {
+		return ""
+	}
+	bits := make([]string, 0, len(v))
+	for _, f := range v {
+		if f != nil && f.String() != "" {
+			bits = append(bits, f.String())
+		}
+	}
+	return strings.Join(bits, sep)
 }

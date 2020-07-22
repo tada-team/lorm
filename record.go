@@ -1,8 +1,6 @@
 package lorm
 
-import (
-	"github.com/tada-team/lorm/op"
-)
+import "github.com/tada-team/lorm/op"
 
 type Record interface {
 	Transactional
@@ -10,8 +8,17 @@ type Record interface {
 	HasPk() bool
 	PkCond(args *op.Args) op.Expr
 	Save() error
+	//table() op.Table
 }
 
-type Saveable interface{ Save() error }
-type Deletable interface{ Delete() error }
-type Reloadable interface{ Reload() error }
+type Deletable interface {
+	Delete() error
+}
+
+type Saveable interface {
+	Save() error
+}
+
+type Reloadable interface {
+	Reload() error
+}

@@ -1,13 +1,11 @@
 package lorm
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"sync/atomic"
 	"time"
-
-	"github.com/jackc/pgx/v4"
 
 	"github.com/pkg/errors"
 )
@@ -23,7 +21,7 @@ func (t BaseTransactional) Tx() *Tx       { return t.tx }
 func (t *BaseTransactional) SetTx(tx *Tx) { t.tx = tx }
 
 type Tx struct {
-	tx      pgx.Tx
+	*sql.Tx
 	num     int64
 	objects []Transactional
 }
@@ -32,9 +30,9 @@ func (tx Tx) String() string {
 	return fmt.Sprintf("[tx:%d]", tx.num)
 }
 
-func NewTx(tx pgx.Tx, num int64) *Tx {
+func NewTx(tx *sql.Tx, num int64) *Tx {
 	return &Tx{
-		tx:      tx,
+		Tx:      tx,
 		num:     num,
 		objects: make([]Transactional, 0),
 	}
@@ -56,14 +54,13 @@ var txNum int64
 func Atomic(fn func(tx *Tx) error) error {
 	start := time.Now()
 	atomic.AddInt64(&txNum, 1)
-
-	sqlTx, txErr := Pool().Begin(context.Background())
+	sqlTx, txErr := conn.Begin()
 	if txErr != nil {
 		return errors.Wrapf(txErr, "[tx:%d] begin failed", txNum)
 	}
 
 	tx := NewTx(sqlTx, txNum)
-	if Debug.ShowSql {
+	if ShowSql {
 		log.Printf("%s begin: %s", tx, breadcrumb())
 	}
 
@@ -74,21 +71,21 @@ func Atomic(fn func(tx *Tx) error) error {
 	}
 
 	if err != nil {
-		if Debug.ShowSql {
+		if ShowSql {
 			log.Printf("%s rollback: %s", tx, err)
 		}
-		if err := tx.tx.Rollback(context.Background()); err != nil {
+		if err := tx.Rollback(); err != nil {
 			return errors.Wrapf(err, "%s rollback failed", tx)
 		}
 		return err
 	}
 
 	startCommit := time.Now()
-	if err := tx.tx.Commit(context.Background()); err != nil {
+	if err := tx.Commit(); err != nil {
 		return errors.Wrapf(err, "%s commit failed", tx)
 	}
 
-	if Debug.ShowSql {
+	if ShowSql {
 		log.Printf(
 			"%s commit (%s) total transaction: %s",
 			tx,
