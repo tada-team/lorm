@@ -1,11 +1,13 @@
 package op
 
 import (
+	"encoding/json"
 	"fmt"
-	"gotada/utils"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type Lock string
@@ -124,7 +126,7 @@ func (q SelectQuery) As(alias Column) Expr {
 
 func (q SelectQuery) Query() string {
 	if len(q.expressions) == 0 && len(q.fromTables) == 0 && q.fromSubquery == nil {
-		log.Panic("invalid query expressions: empty expression, empty tables list, empty fromSubquery:", utils.DebugJSON(q))
+		log.Panic("invalid query expressions: empty expression, empty tables list, empty fromSubquery:", compactJSON(q))
 	}
 
 	var b strings.Builder
@@ -183,4 +185,12 @@ func (q SelectQuery) Query() string {
 	}
 
 	return b.String()
+}
+
+func compactJSON(v interface{}) string {
+	data, err := json.Marshal(v)
+	if err != nil {
+		log.Panicln(errors.Wrap(err, "json marshall fail"))
+	}
+	return string(data)
 }
