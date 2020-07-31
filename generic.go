@@ -99,8 +99,14 @@ func DoGet(f Filter, r Record, t op.Table) (bool, error) {
 	return true, nil
 }
 
+var ReloadError = errors.New("lorm: reload error")
+
 func DoReload(r Record, t op.Table) error {
 	args := op.NewArgs()
 	query := op.Select().From(t).Where(r.PkCond(&args))
-	return TxScan(r.Tx(), query, args, r.GetAllFields()...)
+	err := TxScan(r.Tx(), query, args, r.GetAllFields()...)
+	if err == sql.ErrNoRows {
+		return ReloadError
+	}
+	return err
 }
