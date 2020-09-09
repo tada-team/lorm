@@ -13,7 +13,7 @@ func NewUpdater() BaseUpdater { return BaseUpdater{ch: make(op.Changes)} }
 func (u BaseUpdater) Ch(f op.Column, v interface{}) { u.ch[f] = v }
 func (u BaseUpdater) HasChanges() bool              { return len(u.ch) > 0 }
 
-func (u BaseUpdater) DoSave(r Record, t op.Table) error {
+func (u *BaseUpdater) DoSave(r Record, t op.Table) error {
 	if !r.HasPk() {
 		u.ch = make(op.Changes)
 		return r.Save()
