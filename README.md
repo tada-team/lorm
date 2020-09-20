@@ -125,7 +125,7 @@ import (
     "github.com/tada-team/lorm/op"
 )
 
-func ExampleTransaction() (int, error) {
+func ExampleTransaction(i, j int) (int, error) {
     args := op.NewArgs()
     query := op.RawQuery("SELECT", args.Next(i), "*", args.Next(j))
     
