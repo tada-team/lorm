@@ -6,9 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tada-team/lorm/op"
-
 	"github.com/jackc/pgx/v4"
+	"github.com/tada-team/lorm/op"
 )
 
 func TxLock2(tx *Tx, k1, k2 int) error {

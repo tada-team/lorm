@@ -7,7 +7,7 @@ import (
 
 type rawQuery string
 
-func RawQuery(v ...interface{}) rawQuery {
+func RawQuery(v ...interface{}) Query {
 	return rawQuery(strings.TrimSpace(fmt.Sprintln(v...)))
 }
 
