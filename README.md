@@ -31,7 +31,7 @@ func init() {
 1. install django app: https://github.com/tada-team/lorm_exporter
 2. generate `models.go` from your django models
 
-### .Filter()
+### Generated methods from .Filter() object
 
 | Django  | lorm |
 | ------------- | ------------- |
@@ -40,8 +40,7 @@ func init() {
 | ```user.Save()``` | ```err := user.Save()``` |
 | ```user.Delete()``` | ```err := user.Delete()``` |
 
-
-## Use raw queries
+## Low-level queries
 
 ```go
 package main
@@ -70,20 +69,61 @@ query := "SELECT $1 * $2"
 
 `RawQuery()` works like `fmt.Splintln()`.
 
+### API
 Supported 3 base functions for database access:
 * `lorm.TxExec(tx *lorm.Tx, q op.Query, args op.Args) (sql.Result, error)`
 * `lorm.TxQuery(tx *lorm.Tx, q op.Query, args op.Args, each func(*sql.Rows) error) error`
 * `lorm.TxScan(tx *lorm.Tx, q op.Query, args op.Args, dest ...interface{}) error`
 
-#### Transactions
+### Query constructor
+
+`github.com/tada-team/lorm/op` has many helpers. For example:
+ * `op.Select()`
+ * `op.Delete()`
+ * `op.Insert()`
+ * `op.Or()`
+ * `op.And()`
+ * `op.Not()`
+ * etc. Try autocomplete.
+
+```go
+args := op.NewArgs()
+query := op.Select(
+    UserTable.Id(),
+    UserTable.Created(),
+).From(
+    UserTable,
+).OrderBy(
+    UserTable.Created(),
+).Where( // where arguments concatenated with "AND" statement
+    UserTable.Created().Gt(args.Next(time.Now().Add(-time.Hour))),
+    op.Or(
+        UserTable.IsArchive(),        
+        op.Not(UserTable.IsAdmin()),
+        UserTable.GroupId().InSubquery( // wow, subqueries!
+            op.Select(
+                GroupTable.Id(),
+            ).From(
+                GroupTable,
+            ).Where(
+                GroupTable.Title().ILike(f.Args.Next(op.HasPrefix("aaaaa"))),
+            ),
+        ),
+    ),
+).Limit(
+    args.Next(10),
+)
+```
+
+### Transactions
 
 ```go
 package main
+
 import (
     "github.com/tada-team/lorm"
     "github.com/tada-team/lorm/op"
 )
-
 
 func ExampleTransaction() (int, error) {
     args := op.NewArgs()
