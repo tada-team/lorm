@@ -10,6 +10,7 @@ var (
 	conn    *sql.DB
 	pgxConn *pgx.Conn
 )
+
 var (
 	MaxAttempts    = 10
 	ShowSql        = false

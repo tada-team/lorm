@@ -4,11 +4,9 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/tada-team/lorm/op"
-
-	uuid "github.com/satori/go.uuid"
-
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
+	"github.com/tada-team/lorm/op"
 )
 
 func DoCount(f Filter, table op.Table) int {
