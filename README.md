@@ -106,7 +106,8 @@ query := op.Select(
             ).From(
                 GroupTable,
             ).Where(
-                GroupTable.Title().ILike(f.Args.Next(op.HasPrefix("aaaaa"))),
+                // HasPrefix is shortcut for "...%"
+                GroupTable.Title().ILike(args.Next(op.HasPrefix("aaaaa"))),
             ),
         ),
     ),
