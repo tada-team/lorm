@@ -12,17 +12,9 @@ var (
 )
 
 var (
+	NonFatalErrors []string
+	ShowSql        bool
 	MaxAttempts    = 10
-	ShowSql        = false
-	NonFatalErrors = []string{
-		"bad connection",
-		"broken pipe",
-		"connection refused",
-		"connection reset",
-		"missing destination name",
-		"read-only transaction",
-		"the database system is in recovery mode",
-	}
 )
 
 func SetConn(v *sql.DB) {
