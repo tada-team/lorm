@@ -31,15 +31,55 @@ func init() {
 1. install django app: https://github.com/tada-team/lorm_exporter
 2. generate `models.go` from your django models
 
-### Generated methods from .Filter() object
+## Examples
 
-| Django  | lorm |
-| ------------- | ------------- |
-| ```user = User.objects.get(id=42)```               | ```user := UserTable.MustGet(42)```  |
-| ```user = User.objects.filter(id=42).get()```               | ```user := UserTable.Filter().Id(42).MustGet()```  |
-| ```users = User.objects.filter(is_admin=False, created__gt=dt)```   | ```users := UserTable.Filter().IsAdmin(false).CreatedGt(dt).MustGet()```  |
-| ```user.Save()``` | ```err := user.Save()``` |
-| ```user.Delete()``` | ```err := user.Delete()``` |
+### Single object
+
+Django:
+```python
+try:
+    user = User.objects.get(id=42)
+except User.DoesNotExist:
+    raise Exception("user not found")
+
+user.is_archive = False
+user.save()
+
+user.delete()
+```
+
+lorm:
+```go
+user := UserTable.MustGet(42) // same as UserTable.Filter().Id(42).MustGet() 
+if user == nil {
+    panic("user not found")
+}
+
+user.IsArchive = false
+if err := user.Save(); err != nil {
+    panic(err)
+}
+
+if err := user.Delete(); err != nil {
+    panic(err)
+}
+
+```
+
+### Filter
+
+Django:
+```python
+for user in User.objects.filter(is_admin=False, created__gt=dt):
+    print(user.login)
+```
+
+lorm:
+```go
+for _, user := range UserTable.Filter().IsAdmin(false).CreatedGt(dt).MustList() {
+    fmt.Println(user.login)
+}
+```
 
 ## Low-level queries
 
