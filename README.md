@@ -35,7 +35,8 @@ func init() {
 
 | Django  | lorm |
 | ------------- | ------------- |
-| ```user = User.objects.get(id=42)```               | ```user := UserTable.Filter().Id(42).MustGet()```  |
+| ```user = User.objects.get(id=42)```               | ```user := UserTable.MustGet(42)```  |
+| ```user = User.objects.filter(id=42).get()```               | ```user := UserTable.Filter().Id(42).MustGet()```  |
 | ```users = User.objects.filter(is_admin=False, created__gt=dt)```   | ```users := UserTable.Filter().IsAdmin(false).CreatedGt(dt).MustGet()```  |
 | ```user.Save()``` | ```err := user.Save()``` |
 | ```user.Delete()``` | ```err := user.Delete()``` |
