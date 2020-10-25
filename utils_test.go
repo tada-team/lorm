@@ -3,7 +3,7 @@ package lorm
 import (
 	"testing"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 type (
@@ -29,7 +29,7 @@ func TestIsEmpty(t *testing.T) {
 		"int":   1,
 		"int64": int64(1),
 		"str":   "123",
-		"uid":   uid(uuid.NewV4().String()),
+		"uid":   uid(uuid.New().String()),
 		"pk":    pk(-1),
 	} {
 		t.Run(k, func(t *testing.T) {
