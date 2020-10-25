@@ -7,6 +7,7 @@ type Record interface {
 	GetAllFields() []interface{}
 	HasPk() bool
 	PkCond(args *op.Args) op.Expr
+	NewPk()
 	Save() error
 	//table() op.Table
 }

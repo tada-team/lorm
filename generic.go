@@ -46,10 +46,10 @@ func DoSaveall(err error, r Record, t op.Table) error {
 	if err != nil {
 		return err
 	}
-	if r.HasPk() {
-		return DoUpdate(r, t)
+	if !r.HasPk() {
+		return DoInsert(r, t)
 	}
-	return DoInsert(r, t)
+	return DoUpdate(r, t)
 }
 
 func DoUpdate(r Record, t op.Table) error {
@@ -67,6 +67,9 @@ func DoUpdate(r Record, t op.Table) error {
 }
 
 func DoInsert(r Record, t op.Table) error {
+	if !r.HasPk() {
+		r.NewPk() // uuid generation
+	}
 	kv := make(op.Set)
 	values := r.GetAllFields()
 	args := op.NewArgs()
