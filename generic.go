@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
-	uuid "github.com/satori/go.uuid"
 	"github.com/tada-team/lorm/op"
 )
 
@@ -47,29 +46,41 @@ func DoSaveall(err error, r Record, t op.Table) error {
 	if err != nil {
 		return err
 	}
+	if r.HasPk() {
+		return DoUpdate(r, t)
+	}
+	return DoInsert(r, t)
+}
+
+func DoUpdate(r Record, t op.Table) error {
 	kv := make(op.Set)
 	values := r.GetAllFields()
 	args := op.NewArgs()
 	for i, f := range t.GetAllFields() {
-		if i == 0 {
-			if f.BareName() == "uid" { // XXX:
-				kv[f] = args.Next(uuid.NewV4().String())
-			}
-		} else {
+		if f.BareName() != t.Pk().BareName() {
 			kv[f] = args.Next(values[i])
 		}
 	}
-	if r.HasPk() {
-		query := op.Update(t, kv).Where(r.PkCond(&args))
-		_, err := TxExec(r.Tx(), query, args)
-		return err
+	query := op.Update(t, kv).Where(r.PkCond(&args))
+	_, err := TxExec(r.Tx(), query, args)
+	return err
+}
+
+func DoInsert(r Record, t op.Table) error {
+	kv := make(op.Set)
+	values := r.GetAllFields()
+	args := op.NewArgs()
+	for i, f := range t.GetAllFields() {
+		if f.BareName() != t.Pk().BareName() || !isEmpty(values[0]) {
+			kv[f] = args.Next(values[i])
+		}
 	}
 	query := op.Insert(t, kv).Returning(t.Pk().BareName())
 	if err := TxScan(r.Tx(), query, args, values[0]); err != nil {
 		return err
 	}
 	if !r.HasPk() {
-		log.Panicln("save fail: no pk")
+		return errors.New("programming error: no pk after insert")
 	}
 	return nil
 }
