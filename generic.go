@@ -68,18 +68,24 @@ func DoUpdate(r Record, t op.Table) error {
 
 func DoInsert(r Record, t op.Table) error {
 	if !r.HasPk() {
-		r.NewPk() // uuid generation
+		r.NewPk() // uuid or other custom type generation
 	}
 	kv := make(op.Set)
 	values := r.GetAllFields()
 	args := op.NewArgs()
+	pkName := t.Pk().BareName()
+	pkIdx := 0
 	for i, f := range t.GetAllFields() {
-		if f.BareName() != t.Pk().BareName() || !isEmpty(values[0]) {
-			kv[f] = args.Next(values[i])
+		if f.BareName() == pkName {
+			pkIdx = i
+			if isEmpty(values[i]) {
+				continue
+			}
 		}
+		kv[f] = args.Next(values[i])
 	}
-	query := op.Insert(t, kv).Returning(t.Pk().BareName())
-	if err := TxScan(r.Tx(), query, args, values[0]); err != nil {
+	query := op.Insert(t, kv).Returning(pkName)
+	if err := TxScan(r.Tx(), query, args, values[pkIdx]); err != nil {
 		return err
 	}
 	if !r.HasPk() {

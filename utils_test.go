@@ -20,7 +20,7 @@ func TestIsEmpty(t *testing.T) {
 		"pk":    pk(0),
 	} {
 		t.Run(k, func(t *testing.T) {
-			if !isEmpty(v) {
+			if !isEmpty(&v) {
 				t.Error(k, "not empty:", v)
 			}
 		})
@@ -33,7 +33,7 @@ func TestIsEmpty(t *testing.T) {
 		"pk":    pk(-1),
 	} {
 		t.Run(k, func(t *testing.T) {
-			if isEmpty(v) {
+			if isEmpty(&v) {
 				t.Error("empty:", v)
 			}
 		})
