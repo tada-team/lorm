@@ -3,6 +3,6 @@ package lorm
 import "sync"
 
 type BaseCache struct {
-	sync.Mutex
+	sync.RWMutex
 	Name string
 }
