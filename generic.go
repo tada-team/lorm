@@ -128,3 +128,13 @@ func DoReload(r Record, t op.Table) error {
 	}
 	return err
 }
+
+type HasPk interface {
+	HasPk() bool
+}
+
+func MustHavePk(r HasPk) {
+	if !r.HasPk() {
+		log.Panicln("must have primary key")
+	}
+}
