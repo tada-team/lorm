@@ -138,3 +138,13 @@ func MustHavePk(r HasPk) {
 		log.Panicln("must have primary key")
 	}
 }
+
+func ChooseOneTx(byTx map[*Tx]struct{}) *Tx {
+	if len(byTx) > 1 {
+		log.Panicln("invalid transaction number:", len(byTx))
+	}
+	for tx := range byTx {
+		return tx
+	}
+	return nil
+}
