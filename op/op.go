@@ -71,9 +71,20 @@ func braces(v []Expr, sep string) Expr {
 	}
 }
 
-func TextSearch(lang string, f Expr, v Expr) Expr {
-	return rawExpr(fmt.Sprintf("to_tsvector('%s', %s) @@ plainto_tsquery('%s', %s)", lang, f, lang, v))
+func ToTsVector(lang string, f Expr) TsVector {
+	return TsVector(fmt.Sprintf("to_tsvector('%s', %s)", lang, f))
 }
+func PlainToTsQuery(lang string, arg Expr) TsQuery {
+	return TsQuery(fmt.Sprintf("plainto_tsquery('%s', %s)", lang, arg))
+}
+func PhraseToTsQuery(lang string, arg Expr) TsQuery {
+	return TsQuery(fmt.Sprintf("phraseto_tsquery('%s', %s)", lang, arg))
+}
+
+func TextSearch(lang string, f Expr, v Expr) Expr {
+	return Raw(ToTsVector(lang, f), "@@", PlainToTsQuery(lang, v))
+}
+func VectorTextSearch(lang string, f Expr, v Expr) Expr { return Raw(f, "@@", PlainToTsQuery(lang, v)) }
 
 func Case(cond, t, f Expr) Expr {
 	return rawExpr(fmt.Sprintf("(CASE WHEN %s THEN %s ELSE %s END)", cond, t, f))
