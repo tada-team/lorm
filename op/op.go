@@ -71,14 +71,14 @@ func braces(v []Expr, sep string) Expr {
 	}
 }
 
-func ToTsVector(lang string, f Expr) Expr {
-	return rawExpr(fmt.Sprintf("to_tsvector('%s', %s)", lang, f))
+func ToTsVector(lang string, f Expr) TsVector {
+	return TsVector(fmt.Sprintf("to_tsvector('%s', %s)", lang, f))
 }
-func PlainToTsQuery(lang string, arg Expr) Expr {
-	return rawExpr(fmt.Sprintf("plainto_tsquery('%s', %s)", lang, arg))
+func PlainToTsQuery(lang string, arg Expr) TsQuery {
+	return TsQuery(fmt.Sprintf("plainto_tsquery('%s', %s)", lang, arg))
 }
-func PhraseToTsQuery(lang string, arg Expr) Expr {
-	return rawExpr(fmt.Sprintf("phraseto_tsquery('%s', %s)", lang, arg))
+func PhraseToTsQuery(lang string, arg Expr) TsQuery {
+	return TsQuery(fmt.Sprintf("phraseto_tsquery('%s', %s)", lang, arg))
 }
 
 func TextSearch(lang string, f Expr, v Expr) Expr {

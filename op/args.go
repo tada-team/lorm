@@ -35,7 +35,7 @@ const (
 	Zero        = rawExpr("0")
 )
 
-func (args *Args) Next(v interface{}) Expr {
+func (args *Args) Next(v interface{}) Placeholder {
 	*args = append(*args, v)
 	return Placeholder(fmt.Sprintf("$%d", len(*args)))
 }
