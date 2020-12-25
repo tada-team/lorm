@@ -41,6 +41,12 @@ func (f Column) TextSearchRussianEngStop(v Expr) Expr { return TextSearch("russi
 func (f Column) TextSearchEnglish(v Expr) Expr        { return TextSearch("english", f, v) }
 func (f Column) TextSearchRussian(v Expr) Expr        { return TextSearch("russian", f, v) }
 
+func (f Column) VectorTextSearchRussianEngStop(v Expr) Expr {
+	return VectorTextSearch("russian_engstop", f, v)
+}
+func (f Column) VectorTextSearchEnglish(v Expr) Expr { return VectorTextSearch("english", f, v) }
+func (f Column) VectorTextSearchRussian(v Expr) Expr { return VectorTextSearch("russian", f, v) }
+
 func (f Column) NullableNotEqual(c Column) Expr {
 	return Or(
 		NotEqual(f, c),
