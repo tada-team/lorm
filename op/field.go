@@ -16,15 +16,18 @@ const (
 	Random   = Column("RANDOM()")
 )
 
-func (f Column) Add(v Expr) Expr               { return Add(f, v) }
-func (f Column) Any(v ArrayMask) Expr          { return Any(f, v) }
-func (f Column) As(c Column) Expr              { return rawExpr(fmt.Sprintf("(%s) AS %s", f, c)) }
-func (f Column) Asc() Expr                     { return Asc(f) }
-func (f Column) Desc() Expr                    { return Desc(f) }
-func (f Column) Equal(v Expr) Expr             { return equal(f, v) }
-func (f Column) Gt(v Expr) Expr                { return GreaterThan(f, v) }
-func (f Column) Gte(v Expr) Expr               { return greaterThanOrEqual(f, v) }
-func (f Column) ILike(v Expr) Expr             { return iLike(f, v) }
+func (f Column) Add(v Expr) Expr      { return Add(f, v) }
+func (f Column) Any(v ArrayMask) Expr { return Any(f, v) }
+func (f Column) As(c Column) Expr     { return rawExpr(fmt.Sprintf("(%s) AS %s", f, c)) }
+func (f Column) Asc() Expr            { return Asc(f) }
+func (f Column) Desc() Expr           { return Desc(f) }
+func (f Column) Equal(v Expr) Expr    { return equal(f, v) }
+func (f Column) Gt(v Expr) Expr       { return GreaterThan(f, v) }
+func (f Column) Gte(v Expr) Expr      { return greaterThanOrEqual(f, v) }
+func (f Column) ILike(v Expr) Expr    { return iLike(f, v) }
+
+// only if column has FTS-index
+func (f Column) Search(q TsQuery) Expr         { return Raw(f, "@@", q) }
 func (f Column) InSubquery(q Query) Expr       { return inSubquery(f, q) }
 func (f Column) IsNotNull() Expr               { return IsNotNull(f) }
 func (f Column) IsNull() Expr                  { return IsNull(f) }
