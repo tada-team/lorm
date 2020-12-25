@@ -75,6 +75,10 @@ func TextSearch(lang string, f Expr, v Expr) Expr {
 	return rawExpr(fmt.Sprintf("to_tsvector('%s', %s) @@ plainto_tsquery('%s', %s)", lang, f, lang, v))
 }
 
+func VectorTextSearch(lang string, f Expr, v Expr) Expr {
+	return rawExpr(fmt.Sprintf("%s @@ plainto_tsquery('%s', %s)", f, lang, v))
+}
+
 func Case(cond, t, f Expr) Expr {
 	return rawExpr(fmt.Sprintf("(CASE WHEN %s THEN %s ELSE %s END)", cond, t, f))
 }
