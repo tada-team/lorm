@@ -12,6 +12,7 @@ type Filter interface {
 	GetLock() op.Lock
 	GetOrderBy() op.Expr
 	GetLimit() int
+	GetOffset() int
 }
 
 type BaseFilter struct {
@@ -20,6 +21,7 @@ type BaseFilter struct {
 	Args    op.Args
 	empty   bool
 	limit   int
+	offset  int
 	lock    op.Lock
 	orderBy op.Expr
 }
@@ -30,8 +32,10 @@ func (f BaseFilter) IsEmpty() bool       { return f.empty }
 func (f BaseFilter) GetLock() op.Lock    { return f.lock }
 func (f BaseFilter) GetOrderBy() op.Expr { return f.orderBy }
 func (f BaseFilter) GetLimit() int       { return f.limit }
+func (f BaseFilter) GetOffset() int      { return f.offset }
 
 func (f *BaseFilter) SetOrderBy(v op.Expr)         { f.orderBy = v }
 func (f *BaseFilter) SetLimit(v int)               { f.limit = v }
+func (f *BaseFilter) SetOffset(v int)              { f.offset = v }
 func (f *BaseFilter) SetEmpty()                    { f.empty = true }
 func (f *BaseFilter) SetLock(tx *Tx, lock op.Lock) { f.SetTx(tx); f.lock = lock }
