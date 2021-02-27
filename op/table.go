@@ -32,9 +32,9 @@ type TableName string
 //func (t TableName) As(v string) Table { return Table(fmt.Sprintf("%s AS %s", t, v)) }
 
 func joinTableNames(v []Table, sep string) string {
-	bits := make([]string, 0)
-	for _, t := range v {
-		bits = append(bits, t.String())
+	bits := make([]string, len(v))
+	for i, t := range v {
+		bits[i] = t.String()
 	}
 	return strings.Join(bits, sep)
 }

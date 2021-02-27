@@ -7,12 +7,15 @@ import (
 	"github.com/lib/pq"
 )
 
+var argsMaxSize int
+
 type Args []interface{}
 
 func NewArgs() Args { return make(Args, 0) }
 
 func (args Args) String() string {
 	var b strings.Builder
+	b.Grow(argsMaxSize)
 	b.WriteString("sqlargs{")
 	for i, v := range args {
 		if i > 0 {
@@ -21,7 +24,7 @@ func (args Args) String() string {
 		b.WriteString(fmt.Sprintf(`"$%d": %v`, i+1, v))
 	}
 	b.WriteString("}")
-	return b.String()
+	return maybeGrow(b.String(), &argsMaxSize)
 }
 
 const (

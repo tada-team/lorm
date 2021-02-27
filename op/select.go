@@ -12,6 +12,8 @@ import (
 
 type Lock string
 
+var selectQueryMaxSize int
+
 const (
 	ForUpdate      = Lock("FOR UPDATE")
 	ForNoKeyUpdate = Lock("FOR NO KEY UPDATE")
@@ -130,6 +132,7 @@ func (q SelectQuery) Query() string {
 	}
 
 	var b strings.Builder
+	b.Grow(selectQueryMaxSize)
 
 	b.WriteString("SELECT ")
 	b.WriteString(joinExpr(q.expressions, ", "))
@@ -184,7 +187,7 @@ func (q SelectQuery) Query() string {
 		b.WriteString(q.lock.String())
 	}
 
-	return b.String()
+	return maybeGrow(b.String(), &selectQueryMaxSize)
 }
 
 func compactJSON(v interface{}) string {
