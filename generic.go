@@ -105,7 +105,8 @@ func DoGet(f Filter, r Record, t op.Table) (bool, error) {
 	if f.IsEmpty() {
 		return false, nil
 	}
-	query := op.Select().From(t).Where(f.GetConds()).Lock(f.GetLock()).OrderBy(f.GetOrderBy())
+
+	query := CachedSelect(t).Where(f.GetConds()).Lock(f.GetLock()).OrderBy(f.GetOrderBy())
 	err := TxScan(f.Tx(), query, f.GetArgs(), r.GetAllFields()...)
 	if err == sql.ErrNoRows {
 		return false, nil
@@ -113,6 +114,7 @@ func DoGet(f Filter, r Record, t op.Table) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	MaybeAddToTx(f.Tx(), r)
 	return true, nil
 }
@@ -121,7 +123,7 @@ var ReloadError = errors.New("lorm: reload error")
 
 func DoReload(r Record, t op.Table) error {
 	args := op.NewArgs()
-	query := op.Select().From(t).Where(r.PkCond(&args))
+	query := CachedSelect(t).Where(r.PkCond(&args))
 	err := TxScan(r.Tx(), query, args, r.GetAllFields()...)
 	if err == sql.ErrNoRows {
 		return ReloadError
@@ -147,4 +149,15 @@ func ChooseOneTx(byTx map[*Tx]struct{}) *Tx {
 		return tx
 	}
 	return nil
+}
+
+var selectCache = make(map[op.Table]op.SelectQuery)
+
+func CachedSelect(t op.Table) op.SelectQuery {
+	sel, ok := selectCache[t]
+	if !ok {
+		sel = op.Select().From(t)
+		selectCache[t] = sel
+	}
+	return sel
 }
