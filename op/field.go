@@ -87,7 +87,7 @@ func joinExpr(b *strings.Builder, v []Expr, sep string) {
 		return
 	}
 
-	var first bool
+	first := true
 	for _, f := range v {
 		if f == nil {
 			continue
@@ -98,9 +98,10 @@ func joinExpr(b *strings.Builder, v []Expr, sep string) {
 			continue
 		}
 
-		if !first {
+		if first {
+			first = false
+		} else {
 			b.WriteString(sep)
-			first = true
 		}
 
 		b.WriteString(f.String())
