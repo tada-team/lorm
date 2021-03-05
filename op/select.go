@@ -70,7 +70,7 @@ func (q SelectQuery) AlsoSelect(e ...Expr) SelectQuery {
 
 func (q SelectQuery) From(tables ...Table) SelectQuery {
 	if len(tables) == 0 {
-		log.Panicln("select query: empty tables list")
+		log.Panicln("lorm: select query: empty tables list")
 	}
 	q.fromTables = tables
 	if len(q.expressions) == 0 {

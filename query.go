@@ -3,6 +3,7 @@ package lorm
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strings"
 	"time"
 
@@ -116,6 +117,7 @@ func retry(fn func() error) error {
 		err := fn()
 		if err != nil && nonFatalError(err) && i <= MaxAttempts {
 			i++
+			log.Println("lorm: warn:", err, "retry:", i)
 			time.Sleep(time.Duration(i) * time.Second)
 			continue
 		}
