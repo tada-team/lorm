@@ -2,7 +2,6 @@ package op
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Table interface {
@@ -30,11 +29,3 @@ type TableName string
 //func (t TableName) TableName() TableName { return TableName(t) }
 //func (t TableName) String() string    { return t.TableName() }
 //func (t TableName) As(v string) Table { return Table(fmt.Sprintf("%s AS %s", t, v)) }
-
-func joinTableNames(v []Table, sep string) string {
-	bits := make([]string, len(v))
-	for i, t := range v {
-		bits[i] = t.String()
-	}
-	return strings.Join(bits, sep)
-}

@@ -38,11 +38,14 @@ func Insert(s Table, kv Set) insertQuery {
 
 func (q insertQuery) Returning(v ...Column) insertQuery {
 	if len(v) > 0 {
-		e := make([]Expr, len(v))
-		for i := range v {
-			e[i] = v[i].BareName()
+		var b strings.Builder
+		for i, c := range v {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+			b.WriteString(c.BareName().String())
 		}
-		q.returning = joinExpr(e, ",")
+		q.returning = b.String()
 	}
 	return q
 }

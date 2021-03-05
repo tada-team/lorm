@@ -82,15 +82,27 @@ type rawExpr string
 
 func (f rawExpr) String() string { return string(f) }
 
-func joinExpr(v []Expr, sep string) string {
+func joinExpr(b *strings.Builder, v []Expr, sep string) {
 	if v == nil || len(v) == 0 {
-		return ""
+		return
 	}
-	bits := make([]string, 0, len(v))
+
+	var first bool
 	for _, f := range v {
-		if f != nil && f.String() != "" {
-			bits = append(bits, f.String())
+		if f == nil {
+			continue
 		}
+
+		s := f.String()
+		if s == "" {
+			continue
+		}
+
+		if !first {
+			b.WriteString(sep)
+			first = true
+		}
+
+		b.WriteString(f.String())
 	}
-	return strings.Join(bits, sep)
 }

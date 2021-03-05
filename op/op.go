@@ -40,10 +40,19 @@ func NotEqual(f Expr, v Expr) Expr          { return rawExpr(fmt.Sprintf("%s != 
 func NotInSubquery(f Expr, q Query) Expr    { return rawExpr(fmt.Sprintf("%s NOT IN %s", f, Subquery(q))) }
 func Or(v ...Expr) Expr                     { return braces(v, " OR ") }
 func Over(v ...interface{}) Expr            { return rawExpr(fmt.Sprintf("OVER (%s)", Raw(v...))) }
-func Raw(v ...interface{}) Expr             { return rawExpr(strings.TrimSpace(fmt.Sprintln(v...))) }
 func Sub(f Expr, v Expr) Expr               { return rawExpr(fmt.Sprintf("(%s - %s)", f, v)) }
 func Subquery(q Query) Expr                 { return rawExpr("(" + q.Query() + ")") }
 func Sum(v Expr) Expr                       { return rawExpr(fmt.Sprintf("SUM(%s)", v)) }
+
+func Raw(v ...interface{}) Expr             {
+	if len(v) == 1 {
+		s, ok := v[0].(string)
+		if ok {
+			return rawExpr(s)
+		}
+	}
+	return rawExpr(strings.TrimSpace(fmt.Sprintln(v...)))
+}
 
 func PgAdvisoryXactLock(k Expr) Expr {
 	return rawExpr(fmt.Sprintf("pg_advisory_xact_lock(%s)", k))
@@ -60,6 +69,8 @@ func inSubquery(f Expr, q Query) Expr        { return rawExpr(fmt.Sprintf("%s IN
 func lessThanOrEqual(f Expr, v Expr) Expr    { return rawExpr(fmt.Sprintf("%s <= %s", f, v)) }
 func notAny(f Expr, v ArrayMask) Expr        { return rawExpr(fmt.Sprintf("NOT %s = ANY(%s)", f, string(v))) }
 
+var bracesMaxSize int
+
 func braces(v []Expr, sep string) Expr {
 	switch len(v) {
 	case 0:
@@ -67,7 +78,12 @@ func braces(v []Expr, sep string) Expr {
 	case 1:
 		return v[0]
 	default:
-		return rawExpr("(" + joinExpr(v, sep) + ")")
+		var b strings.Builder
+		b.Grow(bracesMaxSize)
+		b.WriteString("(")
+		joinExpr(&b, v, sep)
+		b.WriteString(")")
+		return rawExpr(maybeGrow(b.String(), &bracesMaxSize))
 	}
 }
 
@@ -91,7 +107,14 @@ func Case(cond, t, f Expr) Expr {
 }
 
 func Union(v ...Expr) rawQuery {
-	return rawQuery(joinExpr(v, " UNION "))
+	var b strings.Builder
+	for i, c := range v {
+		if i > 0 {
+			b.WriteString(" UNION ")
+		}
+		b.WriteString(c.String())
+	}
+	return rawQuery(b.String())
 }
 
 func List(v ...Expr) Expr {
@@ -101,7 +124,9 @@ func List(v ...Expr) Expr {
 	case 1:
 		return v[0]
 	default:
-		return rawExpr(joinExpr(v, ", "))
+		var b strings.Builder
+		joinExpr(&b, v, ", ")
+		return rawExpr(b.String())
 	}
 }
 

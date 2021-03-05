@@ -133,43 +133,48 @@ func (q SelectQuery) Query() string {
 
 	var b strings.Builder
 	b.Grow(selectQueryMaxSize)
-
 	b.WriteString("SELECT ")
-	b.WriteString(joinExpr(q.expressions, ", "))
+	joinExpr(&b, q.expressions, ", ")
 
 	if q.fromSubquery != nil {
 		b.WriteString(" ")
 		b.WriteString(q.fromSubquery.String())
-	} else if v := joinTableNames(q.fromTables, ", "); v != "" {
+	} else {
 		b.WriteString(" FROM ")
-		b.WriteString(v)
-	}
-
-	if q.joins != nil {
-		for _, j := range q.joins {
-			b.WriteString(" ")
-			b.WriteString(j)
+		for i, t := range q.fromTables {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+			b.WriteString(t.String())
 		}
 	}
 
-	if q.whereCondition != nil && q.whereCondition.String() != "" {
-		b.WriteString(" WHERE ")
-		b.WriteString(q.whereCondition.String())
+	for _, j := range q.joins {
+		b.WriteString(" ")
+		b.WriteString(j)
 	}
 
-	if q.groupBy.String() != "" {
+	if q.whereCondition != nil  {
+		cond := q.whereCondition.String()
+		if cond != "" {
+			b.WriteString(" WHERE ")
+			b.WriteString(cond)
+		}
+	}
+
+	if v := q.groupBy.String(); v != "" {
 		b.WriteString(" GROUP BY ")
-		b.WriteString(q.groupBy.String())
+		b.WriteString(v)
 	}
 
-	//if q.window != nil && q.window.String() != "" {
-	//	b.WriteString(" ")
-	//	b.WriteString(q.window.String())
-	//}
-
-	if v := joinExpr(q.orderBy, ",  "); v != "" {
+	if len(q.orderBy) > 0 {
 		b.WriteString(" ORDER BY ")
-		b.WriteString(v)
+		for i, v := range q.orderBy {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+			b.WriteString(v.String())
+		}
 	}
 
 	if q.limit > 0 {
