@@ -50,3 +50,7 @@ func (args *Args) NextArray(v interface{}) ArrayMask {
 	*args = append(*args, pq.Array(v))
 	return ArrayMask("$" + strconv.Itoa(len(*args)))
 }
+
+func (args *Args) Clone() Args {
+	return append(NewArgs(), *args...)
+}

@@ -112,7 +112,15 @@ func (q SelectQuery) GroupBy(f Column) SelectQuery {
 
 func (q SelectQuery) Limit(v int) SelectQuery       { q.limit = v; return q }
 func (q SelectQuery) Offset(v int) SelectQuery      { q.offset = v; return q }
-func (q SelectQuery) OrderBy(v ...Expr) SelectQuery { q.orderBy = v; return q }
+
+func (q SelectQuery) OrderBy(v ...Expr) SelectQuery {
+	for _, e := range v {
+		if e != nil && e.String() != "" {
+			q.orderBy = append(q.orderBy, e)
+		}
+	}
+	return q
+}
 
 func (q SelectQuery) Last(c Column) SelectQuery { return q.OrderBy(c.Desc()).Limit(1) }
 func (q SelectQuery) Lock(v Lock) SelectQuery   { q.lock = v; return q }
