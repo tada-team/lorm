@@ -12,7 +12,7 @@ var argsMaxSize int
 
 type Args []interface{}
 
-func NewArgs() Args { return make(Args, 0) }
+func NewArgs() Args { return make(Args, 0, 8) }
 
 func (args Args) String() string {
 	var b strings.Builder
