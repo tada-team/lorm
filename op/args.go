@@ -2,6 +2,7 @@ package op
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/lib/pq"
@@ -40,12 +41,12 @@ const (
 
 func (args *Args) Next(v interface{}) Placeholder {
 	*args = append(*args, v)
-	return Placeholder(fmt.Sprintf("$%d", len(*args)))
+	return Placeholder("$" + strconv.Itoa(len(*args)))
 }
 
 type ArrayMask Placeholder
 
 func (args *Args) NextArray(v interface{}) ArrayMask {
 	*args = append(*args, pq.Array(v))
-	return ArrayMask(fmt.Sprintf("$%d", len(*args)))
+	return ArrayMask("$" + strconv.Itoa(len(*args)))
 }
