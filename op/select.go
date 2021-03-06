@@ -147,7 +147,7 @@ func (q SelectQuery) Query() string {
 	if q.fromSubquery != nil {
 		b.WriteString(" ")
 		b.WriteString(q.fromSubquery.String())
-	} else {
+	} else if len(q.fromTables) > 0 {
 		b.WriteString(" FROM ")
 		for i, t := range q.fromTables {
 			if i > 0 {
