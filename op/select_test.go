@@ -5,62 +5,44 @@ import (
 	"testing"
 )
 
-// BenchmarkQuery/fmt.Sprintf-2         	 1326040	      1148 ns/op	     264 B/op	      13 allocs/op
-// BenchmarkQuery/strings.Builder-2    	 2431648	       488 ns/op	     168 B/op	       7 allocs/op
-//
-// grow:
-// BenchmarkQuery/strings.Builder-12         	 3883315	       281.5 ns/op	     192 B/op	       5 allocs/op
-//
-// bJoin:
-// BenchmarkQuery/strings.Builder-12         	 3904591	       279.4 ns/op	     224 B/op	       4 allocs/op
-//
-// drop: joinTableNames
-// BenchmarkQuery/strings.Builder-12         	 4704272	       242.9 ns/op	     208 B/op	       3 allocs/op
+// BenchmarkQuery-12    	  416414	      2814 ns/op	    1880 B/op	      37 allocs/op
+// remove fmt.Sprintf()
+// BenchmarkQuery-12    	  621747	      1993 ns/op	    1480 B/op	      32 allocs/op
 func BenchmarkQuery(b *testing.B) {
-
-	b.Run("strings.Builder", func(b *testing.B) {
-		b.ReportAllocs()
-
-		var q Query
-		b.Run("make query", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				q = Select(
-					Wildcard,
-				).From(
-					tableAlias{name: "xxx"},
-				).Where(
-					Or(
-						Raw("id = 42"),
-						Raw("field = 'ttt"),
-					),
-					Or(
-						Raw("xxxx = 42"),
-					),
-				).OrderBy(
-					Column("id"),
-					Column("field"),
-				).LeftJoin(
-					tableAlias{name: "xxx"},
-					And(
-						Raw("id = 42"),
-						Raw("field = 'ttt"),
-					),
-				).Limit(
-					1,
-				).Offset(
-					2,
-				)
-			}
-		})
-
-		b.Run("query", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				q.Query()
-			}
-		})
-	})
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		w := With("t1", Select(One))
+		w = w.With("t2", Select(Wildcard).From(tableAlias{name: "yyy"}))
+		q := w.Do(Select(
+			Wildcard,
+		).From(
+			tableAlias{name: "xxx"},
+		).Where(
+			Or(
+				Raw("id = 42"),
+				Raw("field = 'ttt"),
+			),
+			Or(
+				Raw("field2 = 42"),
+			),
+		).OrderBy(
+			Column("id"),
+			Column("field"),
+		).LeftJoin(
+			tableAlias{name: "xxx"},
+			And(
+				Raw("id = 42"),
+				Raw("field = 'ttt"),
+			),
+		).Limit(
+			1,
+		).Offset(
+			2,
+		))
+		if v := q.Query(); v == "" {
+			b.Fatal("empty result")
+		}
+	}
 }
 
 func TestQueryTest(t *testing.T) {

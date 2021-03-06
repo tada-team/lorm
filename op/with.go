@@ -1,17 +1,15 @@
 package op
 
-import "fmt"
-
 type WithQuery string
 
 func With(alias string, q Query) WithQuery {
-	return WithQuery(fmt.Sprintf("WITH %s AS (%s)", alias, q))
+	return WithQuery("WITH " + alias + " AS (" + q.String() + ")")
 }
 
 func (w WithQuery) String() string { return string(w) }
 
 func (w WithQuery) With(alias string, q Query) WithQuery {
-	return WithQuery(fmt.Sprintf("%s, %s AS (%s)", w, alias, q))
+	return WithQuery(w.String() + ", " + alias + " AS (" + q.String() + ")")
 }
 
 func (w WithQuery) Do(q Expr) Query {

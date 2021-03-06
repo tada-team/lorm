@@ -2,7 +2,6 @@ package op
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -56,7 +55,7 @@ func Select(s ...Expr) SelectQuery {
 }
 
 func (q SelectQuery) FromSubquery(subquery Query, alias string) SelectQuery {
-	q.fromSubquery = rawExpr(fmt.Sprintf("FROM (%s) AS %s", subquery, alias))
+	q.fromSubquery = rawExpr("FROM (" + subquery.String() + ") AS " + alias)
 	if len(q.expressions) == 0 {
 		q.expressions = append(q.expressions, Wildcard)
 	}
@@ -84,12 +83,12 @@ func (q SelectQuery) From(tables ...Table) SelectQuery {
 }
 
 func (q SelectQuery) LeftJoin(t Table, cond Expr) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("LEFT JOIN %s ON %s", t, cond))
+	q.joins = append(q.joins, "LEFT JOIN " + t.String() + " ON " + cond.String())
 	return q
 }
 
 func (q SelectQuery) InnerJoin(t Table, cond Expr) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("INNER JOIN %s ON %s", t, cond))
+	q.joins = append(q.joins, "INNER JOIN " + t.String() + " ON " + cond.String())
 	return q
 }
 
@@ -131,7 +130,7 @@ func (q SelectQuery) ForNoKeyUpdate() SelectQuery { q.lock = ForNoKeyUpdate; ret
 func (q SelectQuery) String() string { return q.Query() }
 
 func (q SelectQuery) As(alias Column) Expr {
-	return rawExpr(fmt.Sprintf("(%s) AS %s", q.Query(), alias))
+	return rawExpr("(" + q.String()  + ") AS " +alias.String())
 }
 
 func (q SelectQuery) Query() string {
