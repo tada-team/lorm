@@ -1,7 +1,6 @@
 package lorm
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -49,7 +48,7 @@ func (t *BaseTable) SetAlias(s string) { t.alias = s }
 
 func (t BaseTable) TableName() op.TableName {
 	if t.alias != "" {
-		return op.TableName(fmt.Sprintf("%s AS %s", t.name, t.alias))
+		return op.TableName(t.name + " AS " +t.alias)
 	}
 	return op.TableName(t.name)
 }

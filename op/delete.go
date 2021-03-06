@@ -1,7 +1,7 @@
 package op
 
 import (
-	"fmt"
+	"strings"
 )
 
 // [ WITH [ RECURSIVE ] with_query [, ...] ]
@@ -38,13 +38,23 @@ func (q deleteQuery) Returning(v Expr) deleteQuery {
 
 func (q deleteQuery) String() string { return q.Query() }
 
+var deleteQueryMaxSize = 16
+
 func (q deleteQuery) Query() string {
-	res := fmt.Sprintf("DELETE FROM %s", q.table)
+	var b strings.Builder
+	b.Grow(deleteQueryMaxSize)
+
+	b.WriteString("DELETE FROM ")
+	b.WriteString(q.table.String())
+
 	if q.condition != nil && q.condition.String() != "" {
-		res = fmt.Sprintf("%s WHERE %s", res, q.condition)
+		b.WriteString(" WHERE ")
+		b.WriteString(q.condition.String())
 	}
 	if q.outputExpression != nil && q.outputExpression.String() != "" {
-		res = fmt.Sprintf("%s RETURNING %s", res, q.outputExpression)
+		b.WriteString(" RETURNING ")
+		b.WriteString(q.outputExpression.String())
 	}
-	return res
+
+	return maybeGrow(b.String(), &deleteQueryMaxSize)
 }

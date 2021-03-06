@@ -11,7 +11,7 @@ import (
 
 type Lock string
 
-var selectQueryMaxSize int
+var selectQueryMaxSize = 16
 
 const (
 	ForUpdate      = Lock("FOR UPDATE")

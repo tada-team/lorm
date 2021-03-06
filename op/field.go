@@ -18,7 +18,7 @@ const (
 
 func (f Column) Add(v Expr) Expr      { return Add(f, v) }
 func (f Column) Any(v ArrayMask) Expr { return Any(f, v) }
-func (f Column) As(c Column) Expr     { return rawExpr(fmt.Sprintf("(%s) AS %s", f, c)) }
+func (f Column) As(c Column) Expr     { return rawExpr("(" + f.String() + ") AS " + c.String()) }
 func (f Column) Asc() Expr            { return Asc(f) }
 func (f Column) Desc() Expr           { return Desc(f) }
 func (f Column) Equal(v Expr) Expr    { return equal(f, v) }
@@ -70,10 +70,11 @@ func (f Column) BareName() Column {
 type Placeholder string
 
 func (p Placeholder) PlainToTsQuery(lang string) TsQuery {
-	return TsQuery(fmt.Sprintf("plainto_tsquery('%s', %s)", lang, p))
+	return TsQuery("plainto_tsquery('" + lang +"', " + p.String() + ")")
 }
+
 func (p Placeholder) PhraseToTsQuery(lang string) TsQuery {
-	return TsQuery(fmt.Sprintf("phraseto_tsquery('%s', %s)", lang, p))
+	return TsQuery("phraseto_tsquery('" + lang +"', " + p.String() + ")")
 }
 
 func (p Placeholder) String() string { return string(p) }
