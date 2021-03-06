@@ -67,6 +67,7 @@ func greaterThanOrEqual(f Expr, v Expr) Expr { return rawExpr(f.String() + " >= 
 func iLike(f Expr, v Expr) Expr              { return rawExpr(f.String() + " ILIKE " + v.String()) }
 func inSubquery(f Expr, q Query) Expr        { return rawExpr(f.String() + " IN " + Subquery(q).String()) }
 func lessThanOrEqual(f Expr, v Expr) Expr    { return rawExpr(f.String() + " <= " + v.String()) }
+
 func notAny(f Expr, v ArrayMask) Expr {
 	return rawExpr("NOT " + f.String() + " = ANY(" + string(v) + ")")
 }
@@ -110,7 +111,7 @@ func VectorTextSearch(lang string, f Expr, v Expr) Expr {
 }
 
 func Case(cond, t, f Expr) Expr {
-	return rawExpr("(CASE WHEN " + cond.String() + " THEN " + t.String() +  " ELSE " + f.String() +  " END)")
+	return rawExpr("(CASE WHEN " + cond.String() + " THEN " + t.String() + " ELSE " + f.String() + " END)")
 }
 
 func Union(v ...Expr) rawQuery {
