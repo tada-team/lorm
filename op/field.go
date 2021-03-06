@@ -76,7 +76,7 @@ func (p Placeholder) PhraseToTsQuery(lang string) TsQuery {
 	return TsQuery(fmt.Sprintf("phraseto_tsquery('%s', %s)", lang, p))
 }
 
-func (f Placeholder) String() string { return string(f) }
+func (p Placeholder) String() string { return string(p) }
 
 type rawExpr string
 
@@ -106,4 +106,17 @@ func joinExpr(b *strings.Builder, v []Expr, sep string) {
 
 		b.WriteString(f.String())
 	}
+}
+
+func nonEmptyExpr(conds []Expr) []Expr {
+	if len(conds) == 0 {
+		return nil
+	}
+	res := make([]Expr, 0, len(conds))
+	for _, c := range conds {
+		if c != nil && c.String() != "" {
+			res = append(res, c)
+		}
+	}
+	return res
 }

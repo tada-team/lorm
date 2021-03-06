@@ -92,19 +92,12 @@ func (q SelectQuery) InnerJoin(t Table, cond Expr) SelectQuery {
 	return q
 }
 
-func (q SelectQuery) Where(conds ...Expr) SelectQuery { q.where = conds; return q }
-func (q SelectQuery) GroupBy(c Column) SelectQuery    { q.groupBy = c; return q }
-func (q SelectQuery) Limit(v int) SelectQuery         { q.limit = v; return q }
-func (q SelectQuery) Offset(v int) SelectQuery        { q.offset = v; return q }
+func (q SelectQuery) Where(v ...Expr) SelectQuery   { q.where = nonEmptyExpr(v); return q }
+func (q SelectQuery) OrderBy(v ...Expr) SelectQuery { q.orderBy = nonEmptyExpr(v); return q }
 
-func (q SelectQuery) OrderBy(v ...Expr) SelectQuery {
-	for _, e := range v {
-		if e != nil && e.String() != "" {
-			q.orderBy = append(q.orderBy, e)
-		}
-	}
-	return q
-}
+func (q SelectQuery) GroupBy(c Column) SelectQuery { q.groupBy = c; return q }
+func (q SelectQuery) Limit(v int) SelectQuery      { q.limit = v; return q }
+func (q SelectQuery) Offset(v int) SelectQuery     { q.offset = v; return q }
 
 func (q SelectQuery) Last(c Column) SelectQuery   { return q.OrderBy(c.Desc()).Limit(1) }
 func (q SelectQuery) Lock(v Lock) SelectQuery     { q.lock = v; return q }
