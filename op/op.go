@@ -16,35 +16,35 @@ func EscapeSpecialSymbols(s string) string {
 	return escapeSpecialReplacer.Replace(s)
 }
 
-func Add(f Expr, v Expr) Expr               { return rawExpr(fmt.Sprintf("(%s + %s)", f, v)) }
-func Mul(f Expr, v Expr) Expr               { return rawExpr(fmt.Sprintf("(%s * %s)", f, v)) }
+func Add(f Expr, v Expr) Expr               { return rawExpr(f.String() + " + " + v.String()) }
+func Mul(f Expr, v Expr) Expr               { return rawExpr(f.String() + " * " + v.String()) }
 func Aliased(alias string, f Column) Column { return Column(alias + "." + f.BareName().String()) }
 func And(v ...Expr) Expr                    { return braces(v, " AND ") }
-func Any(f Expr, v ArrayMask) Expr          { return rawExpr(fmt.Sprintf("%s = ANY(%s)", f, string(v))) }
-func Asc(f Expr) Expr                       { return rawExpr(fmt.Sprintf("%s ASC", f)) }
-func Coalesce(a, b Expr) Expr               { return rawExpr(fmt.Sprintf("COALESCE(%s, %s)", a, b)) }
-func Count(v Expr) Expr                     { return rawExpr(fmt.Sprintf("COUNT(%s)", v)) }
-func Desc(f Expr) Expr                      { return rawExpr(fmt.Sprintf("%s DESC", f)) }
-func Distinct(f Expr) Expr                  { return rawExpr(fmt.Sprintf("DISTINCT %s", f)) }
-func Exists(q Query) Expr                   { return rawExpr(fmt.Sprintf("EXISTS %s", Subquery(q))) }
-func FirstValue(v Expr) Expr                { return rawExpr(fmt.Sprintf("first_value(%s)", v)) }
-func GreaterThan(f Expr, v Expr) Expr       { return rawExpr(fmt.Sprintf("%s > %s", f, v)) }
-func Greatest(f Expr, v Expr) Expr          { return rawExpr(fmt.Sprintf("GREATEST(%s, %s)", f, v)) }
-func IsNotNull(f Expr) Expr                 { return rawExpr(fmt.Sprintf("%s IS NOT NULL", f)) }
-func IsNull(f Expr) Expr                    { return rawExpr(fmt.Sprintf("%s IS NULL", f)) }
-func Lag(v Expr) Expr                       { return rawExpr(fmt.Sprintf("LAG(%s)", v)) }
-func Lead(v Expr) Expr                      { return rawExpr(fmt.Sprintf("LEAD(%s)", v)) }
-func LessThan(f Expr, v Expr) Expr          { return rawExpr(fmt.Sprintf("%s < %s", f, v)) }
-func Not(f Expr) Expr                       { return rawExpr(fmt.Sprintf("NOT %s", f.String())) }
-func NotEqual(f Expr, v Expr) Expr          { return rawExpr(fmt.Sprintf("%s != %s", f, v)) }
-func NotInSubquery(f Expr, q Query) Expr    { return rawExpr(fmt.Sprintf("%s NOT IN %s", f, Subquery(q))) }
+func Any(f Expr, v ArrayMask) Expr          { return rawExpr(f.String() + " = ANY(" + string(v) + ")") }
+func Asc(f Expr) Expr                       { return rawExpr(f.String() + " ASC") }
+func Coalesce(a, b Expr) Expr               { return rawExpr("COALESCE(" + a.String() + ", " + b.String() + ")") }
+func Count(v Expr) Expr                     { return rawExpr("COUNT(" + v.String() + ")") }
+func Desc(f Expr) Expr                      { return rawExpr(f.String() + " DESC") }
+func Distinct(f Expr) Expr                  { return rawExpr("DISTINCT " + f.String()) }
+func Exists(q Query) Expr                   { return rawExpr("EXISTS " + Subquery(q).String()) }
+func FirstValue(v Expr) Expr                { return rawExpr("first_value(" + v.String() + ")") }
+func GreaterThan(f Expr, v Expr) Expr       { return rawExpr(f.String() + " > " + v.String()) }
+func Greatest(f Expr, v Expr) Expr          { return rawExpr("GREATEST(" + f.String() + ", " + v.String() + ")") }
+func IsNotNull(f Expr) Expr                 { return rawExpr(f.String() + " IS NOT NULL") }
+func IsNull(f Expr) Expr                    { return rawExpr(f.String() + " IS NULL") }
+func Lag(v Expr) Expr                       { return rawExpr("LAG(" + v.String() + ")") }
+func Lead(v Expr) Expr                      { return rawExpr("LEAD(" + v.String() + ")") }
+func LessThan(f Expr, v Expr) Expr          { return rawExpr(f.String() + " < " + v.String()) }
+func Not(f Expr) Expr                       { return rawExpr("NOT " + f.String()) }
+func NotEqual(f Expr, v Expr) Expr          { return rawExpr(f.String() + " != " + v.String()) }
+func NotInSubquery(f Expr, q Query) Expr    { return rawExpr(f.String() + " NOT IN (" + q.String() + ")") }
 func Or(v ...Expr) Expr                     { return braces(v, " OR ") }
-func Over(v ...interface{}) Expr            { return rawExpr(fmt.Sprintf("OVER (%s)", Raw(v...))) }
-func Sub(f Expr, v Expr) Expr               { return rawExpr(fmt.Sprintf("(%s - %s)", f, v)) }
+func Over(v ...interface{}) Expr            { return rawExpr("OVER (" + Raw(v...).String() + ")") }
+func Sub(f Expr, v Expr) Expr               { return rawExpr("(" + f.String() + " - " + v.String() + ")") }
 func Subquery(q Query) Expr                 { return rawExpr("(" + q.Query() + ")") }
-func Sum(v Expr) Expr                       { return rawExpr(fmt.Sprintf("SUM(%s)", v)) }
+func Sum(v Expr) Expr                       { return rawExpr("SUM(" + v.String() + ")") }
 
-func Raw(v ...interface{}) Expr             {
+func Raw(v ...interface{}) Expr {
 	if len(v) == 1 {
 		s, ok := v[0].(string)
 		if ok {
@@ -55,19 +55,21 @@ func Raw(v ...interface{}) Expr             {
 }
 
 func PgAdvisoryXactLock(k Expr) Expr {
-	return rawExpr(fmt.Sprintf("pg_advisory_xact_lock(%s)", k))
+	return rawExpr("pg_advisory_xact_lock(" + k.String() + ")")
 }
 
 func PgAdvisoryXactLock2(k1, k2 int) Expr {
 	return rawExpr(fmt.Sprintf("pg_advisory_xact_lock(%d, %d)", k1, k2))
 }
 
-func equal(f Expr, v Expr) Expr              { return rawExpr(fmt.Sprintf("%s = %s", f, v)) }
-func greaterThanOrEqual(f Expr, v Expr) Expr { return rawExpr(fmt.Sprintf("%s >= %s", f, v)) }
-func iLike(f Expr, v Expr) Expr              { return rawExpr(fmt.Sprintf("%s ILIKE %s", f, v)) }
-func inSubquery(f Expr, q Query) Expr        { return rawExpr(fmt.Sprintf("%s IN %s", f, Subquery(q))) }
-func lessThanOrEqual(f Expr, v Expr) Expr    { return rawExpr(fmt.Sprintf("%s <= %s", f, v)) }
-func notAny(f Expr, v ArrayMask) Expr        { return rawExpr(fmt.Sprintf("NOT %s = ANY(%s)", f, string(v))) }
+func equal(f Expr, v Expr) Expr              { return rawExpr(f.String() + " = " + v.String()) }
+func greaterThanOrEqual(f Expr, v Expr) Expr { return rawExpr(f.String() + " >= " + v.String()) }
+func iLike(f Expr, v Expr) Expr              { return rawExpr(f.String() + " ILIKE " + v.String()) }
+func inSubquery(f Expr, q Query) Expr        { return rawExpr(f.String() + " IN " + Subquery(q).String()) }
+func lessThanOrEqual(f Expr, v Expr) Expr    { return rawExpr(f.String() + " <= " + v.String()) }
+func notAny(f Expr, v ArrayMask) Expr {
+	return rawExpr("NOT " + f.String() + " = ANY(" + string(v) + ")")
+}
 
 var bracesMaxSize int
 
@@ -90,9 +92,11 @@ func braces(v []Expr, sep string) Expr {
 func ToTsVector(lang string, f Expr) TsVector {
 	return TsVector(fmt.Sprintf("to_tsvector('%s', %s)", lang, f))
 }
+
 func PlainToTsQuery(lang string, arg Expr) TsQuery {
 	return TsQuery(fmt.Sprintf("plainto_tsquery('%s', %s)", lang, arg))
 }
+
 func PhraseToTsQuery(lang string, arg Expr) TsQuery {
 	return TsQuery(fmt.Sprintf("phraseto_tsquery('%s', %s)", lang, arg))
 }
@@ -100,10 +104,13 @@ func PhraseToTsQuery(lang string, arg Expr) TsQuery {
 func TextSearch(lang string, f Expr, v Expr) Expr {
 	return Raw(ToTsVector(lang, f), "@@", PlainToTsQuery(lang, v))
 }
-func VectorTextSearch(lang string, f Expr, v Expr) Expr { return Raw(f, "@@", PlainToTsQuery(lang, v)) }
+
+func VectorTextSearch(lang string, f Expr, v Expr) Expr {
+	return Raw(f, "@@", PlainToTsQuery(lang, v))
+}
 
 func Case(cond, t, f Expr) Expr {
-	return rawExpr(fmt.Sprintf("(CASE WHEN %s THEN %s ELSE %s END)", cond, t, f))
+	return rawExpr("(CASE WHEN " + cond.String() + " THEN " + t.String() +  " ELSE " + f.String() +  " END)")
 }
 
 func Union(v ...Expr) rawQuery {
