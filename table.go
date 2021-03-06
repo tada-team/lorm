@@ -32,33 +32,44 @@ type BaseTable struct {
 	name   string
 	alias  string
 	fields []string
+
+	cachedFields     *[]op.Column
+	cachedFieldsExpr *op.Expr
 }
 
-func NewBaseTable(name, alias string, fields ...string) BaseTable {
+func NewBaseTable(name, aliasSeed string, fields ...string) BaseTable {
 	return BaseTable{
 		name:   name,
-		alias:  nextAlias(alias),
+		alias:  nextAlias(aliasSeed),
 		fields: fields,
 	}
 }
 
-func (t BaseTable) Pk() op.Column      { return t.Column(t.fields[0]) }
-func (t BaseTable) GetAlias() string   { return t.alias }
-func (t *BaseTable) SetAlias(s string) { t.alias = s }
+func (t BaseTable) Pk() op.Column { return t.Column(t.fields[0]) }
+
+func (t BaseTable) String() string { return string(t.TableName()) }
+
+func (t BaseTable) GetAlias() string { return t.alias }
+
+func (t *BaseTable) SetAlias(s string) {
+	t.alias = s
+	t.cachedFields = nil
+	t.cachedFieldsExpr = nil
+}
 
 func (t BaseTable) TableName() op.TableName {
 	if t.alias != "" {
-		return op.TableName(t.name + " AS " +t.alias)
+		return op.TableName(t.name + " AS " + t.alias)
 	}
 	return op.TableName(t.name)
 }
 
 func (t BaseTable) AllFieldsExpr() op.Expr {
-	bits := make([]string, len(t.fields))
-	for i, f := range t.GetAllFields() {
-		bits[i] = f.String()
+	if t.cachedFieldsExpr == nil {
+		expr := op.Raw(strings.Join(t.fields, ", "))
+		t.cachedFieldsExpr = &expr
 	}
-	return op.Raw(strings.Join(bits, ", "))
+	return *t.cachedFieldsExpr
 }
 
 func (t BaseTable) Column(v string) op.Column {
@@ -69,13 +80,12 @@ func (t BaseTable) Column(v string) op.Column {
 }
 
 func (t BaseTable) GetAllFields() []op.Column {
-	fields := make([]op.Column, len(t.fields))
-	for i := range t.fields {
-		fields[i] = t.Column(t.fields[i])
+	if t.cachedFields == nil {
+		fields := make([]op.Column, len(t.fields))
+		for i, f := range t.fields {
+			fields[i] = t.Column(f)
+		}
+		t.cachedFields = &fields
 	}
-	return fields
-}
-
-func (t BaseTable) String() string {
-	return string(t.TableName())
+	return *t.cachedFields
 }
