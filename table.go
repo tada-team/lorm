@@ -66,7 +66,11 @@ func (t BaseTable) TableName() op.TableName {
 
 func (t BaseTable) AllFieldsExpr() op.Expr {
 	if t.cachedFieldsExpr == nil {
-		expr := op.Raw(strings.Join(t.fields, ", "))
+		bits := make([]string, len(t.fields))
+		for i, c := range t.GetAllFields() {
+			bits[i] = c.String()
+		}
+		expr := op.Raw(strings.Join(bits, ", "))
 		t.cachedFieldsExpr = &expr
 	}
 	return *t.cachedFieldsExpr
