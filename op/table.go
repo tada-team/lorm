@@ -6,7 +6,6 @@ import (
 
 type Table interface {
 	fmt.Stringer
-	TableName() TableName
 	GetAllFields() []Column
 	Pk() Column
 }
@@ -20,12 +19,7 @@ func TableAlias(name string) tableAlias {
 }
 
 func (t tableAlias) String() string         { return string(t.name) }
-func (t tableAlias) TableName() TableName   { return t.name }
 func (t tableAlias) GetAllFields() []Column { panic("not implemented") }
 func (t tableAlias) Pk() Column             { panic("not implemented") }
 
 type TableName string
-
-//func (t TableName) TableName() TableName { return TableName(t) }
-//func (t TableName) String() string    { return t.TableName() }
-//func (t TableName) As(v string) Table { return Table(fmt.Sprintf("%s AS %s", t, v)) }

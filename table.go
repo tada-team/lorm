@@ -35,19 +35,26 @@ type BaseTable struct {
 
 	cachedFields     *[]op.Column
 	cachedFieldsExpr *op.Expr
+	cachedColumns    map[string]op.Column
 }
 
 func NewBaseTable(name, aliasSeed string, fields ...string) BaseTable {
 	return BaseTable{
-		name:   name,
-		alias:  nextAlias(aliasSeed),
-		fields: fields,
+		name:          name,
+		alias:         nextAlias(aliasSeed),
+		fields:        fields,
+		cachedColumns: make(map[string]op.Column, len(fields)),
 	}
 }
 
 func (t BaseTable) Pk() op.Column { return t.Column(t.fields[0]) }
 
-func (t BaseTable) String() string { return string(t.TableName()) }
+func (t BaseTable) String() string {
+	if t.alias != "" {
+		return t.name + " AS " + t.alias
+	}
+	return t.name
+}
 
 func (t BaseTable) GetAlias() string { return t.alias }
 
@@ -55,13 +62,7 @@ func (t *BaseTable) SetAlias(s string) {
 	t.alias = s
 	t.cachedFields = nil
 	t.cachedFieldsExpr = nil
-}
-
-func (t BaseTable) TableName() op.TableName {
-	if t.alias != "" {
-		return op.TableName(t.name + " AS " + t.alias)
-	}
-	return op.TableName(t.name)
+	t.cachedColumns = make(map[string]op.Column, len(t.fields))
 }
 
 func (t BaseTable) AllFieldsExpr() op.Expr {
@@ -77,10 +78,16 @@ func (t BaseTable) AllFieldsExpr() op.Expr {
 }
 
 func (t BaseTable) Column(v string) op.Column {
-	if t.alias != "" {
-		return op.Column(t.alias + "." + v)
+	res, ok := t.cachedColumns[v]
+	if !ok {
+		if t.alias != "" {
+			res = op.Column(t.alias + "." + v)
+		} else {
+			res = op.Column(t.name + "." + v)
+		}
+		t.cachedColumns[v] = res
 	}
-	return op.Column(t.name + "." + v)
+	return res
 }
 
 func (t BaseTable) GetAllFields() []op.Column {
