@@ -139,7 +139,12 @@ func (q SelectQuery) Query() string {
 		b.WriteString(j)
 	}
 
-	if len(q.where) > 0 {
+	switch len(q.where) {
+	case 0:
+	case 1:
+		b.WriteString(" WHERE ")
+		b.WriteString(q.where[0].String())
+	default:
 		b.WriteString(" WHERE (")
 		for i, cond := range q.where {
 			if i > 0 {
