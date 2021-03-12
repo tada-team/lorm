@@ -8,23 +8,29 @@ import (
 	"github.com/tada-team/lorm/op"
 )
 
-var aliases = make(map[string]int)
+var (
+	aliases      = make(map[string]int)
+	defaultAlias = "t"
+)
 
 func nextAlias(className string) string {
-	short := ""
+	var b strings.Builder
 	for _, r := range className {
 		if unicode.IsUpper(r) && unicode.IsLetter(r) {
-			short += string(r)
+			b.WriteRune(r)
 		}
 	}
-	short = strings.ToLower(short)
+
+	short := strings.ToLower(b.String())
 	if short == "" {
-		short = "t"
+		short = defaultAlias
 	}
+
 	aliases[short]++
 	if aliases[short] > 1 {
 		short += strconv.Itoa(aliases[short])
 	}
+
 	return short
 }
 

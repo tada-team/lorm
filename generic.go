@@ -3,6 +3,7 @@ package lorm
 import (
 	"database/sql"
 	"log"
+	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/tada-team/lorm/op"
@@ -151,13 +152,21 @@ func ChooseOneTx(byTx map[*Tx]struct{}) *Tx {
 	return nil
 }
 
-var selectCache = make(map[op.Table]op.SelectQuery)
+var (
+	selectCache = make(map[string]*op.SelectQuery)
+	selectCacheMux sync.RWMutex
+)
 
-func CachedSelect(t op.Table) op.SelectQuery {
-	sel, ok := selectCache[t]
-	if !ok {
-		sel = op.Select().From(t)
-		selectCache[t] = sel
+func CachedSelect(t op.Table) *op.SelectQuery {
+	selectCacheMux.RLock()
+	sel := selectCache[t.String()]
+	selectCacheMux.RUnlock()
+
+	if sel == nil {
+		v := op.Select().From(t)
+		selectCacheMux.Lock()
+		selectCache[t.String()] = &v
+		selectCacheMux.Unlock()
 	}
 	return sel
 }
