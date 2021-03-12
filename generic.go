@@ -153,7 +153,7 @@ func ChooseOneTx(byTx map[*Tx]struct{}) *Tx {
 }
 
 var (
-	selectCache = make(map[string]*op.SelectQuery)
+	selectCache    = make(map[string]*op.SelectQuery)
 	selectCacheMux sync.RWMutex
 )
 
@@ -162,11 +162,13 @@ func CachedSelect(t op.Table) *op.SelectQuery {
 	sel := selectCache[t.String()]
 	selectCacheMux.RUnlock()
 
-	if sel == nil {
-		v := op.Select().From(t)
-		selectCacheMux.Lock()
-		selectCache[t.String()] = &v
-		selectCacheMux.Unlock()
+	if sel != nil {
+		return sel
 	}
-	return sel
+
+	v := op.Select().From(t)
+	selectCacheMux.Lock()
+	selectCache[t.String()] = &v
+	selectCacheMux.Unlock()
+	return &v
 }
