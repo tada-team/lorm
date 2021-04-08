@@ -10,17 +10,29 @@ import (
 	"github.com/tada-team/lorm/op"
 )
 
-type beforeQueryHandler func(tx *Tx, qNum int64, q string, v op.Args)
-type afterQueryHandler func(tx *Tx, qNum int64, q string, v op.Args, dur time.Duration)
+type (
+	beforeQueryHandler func(tx *Tx, qNum int64, q string, v op.Args)
+	afterQueryHandler  func(tx *Tx, qNum int64, q string, v op.Args, dur time.Duration)
+	cacheUsedHandler   func(breadcrumb, name string)
+)
 
-var beforeQueryHandlers = make([]beforeQueryHandler, 0)
-var afterQueryHandlers = make([]afterQueryHandler, 0)
-
-var qNum int64
+var (
+	qNum                int64
+	beforeQueryHandlers []beforeQueryHandler
+	afterQueryHandlers  []afterQueryHandler
+	cacheUsedHandlers   []cacheUsedHandler
+)
 
 func QueryCounter() int64               { return qNum }
 func BeforeQuery(fn beforeQueryHandler) { beforeQueryHandlers = append(beforeQueryHandlers, fn) }
 func AfterQuery(fn afterQueryHandler)   { afterQueryHandlers = append(afterQueryHandlers, fn) }
+func OnCacheUsed(fn cacheUsedHandler)   { cacheUsedHandlers = append(cacheUsedHandlers, fn) }
+
+func CacheUsed(name string) {
+	for _, fn := range cacheUsedHandlers {
+		fn(breadcrumb(), name)
+	}
+}
 
 func trackQuery(tx *Tx, q string, v op.Args) func() {
 	atomic.AddInt64(&qNum, 1)
