@@ -13,7 +13,7 @@ import (
 type (
 	beforeQueryHandler func(tx *Tx, qNum int64, q string, v op.Args)
 	afterQueryHandler  func(tx *Tx, qNum int64, q string, v op.Args, dur time.Duration)
-	cacheUsedHandler   func(breadcrumb, name string)
+	cacheUsedHandler   func(name string)
 )
 
 var (
@@ -30,7 +30,7 @@ func OnCacheUsed(fn cacheUsedHandler)   { cacheUsedHandlers = append(cacheUsedHa
 
 func CacheUsed(name string) {
 	for _, fn := range cacheUsedHandlers {
-		fn(breadcrumb(), name)
+		fn(name)
 	}
 }
 
