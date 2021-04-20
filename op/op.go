@@ -29,20 +29,22 @@ func Distinct(f Expr) Expr                  { return rawExpr("DISTINCT " + f.Str
 func Exists(q Query) Expr                   { return rawExpr("EXISTS " + Subquery(q).String()) }
 func FirstValue(v Expr) Expr                { return rawExpr("first_value(" + v.String() + ")") }
 func GreaterThan(f Expr, v Expr) Expr       { return rawExpr(f.String() + " > " + v.String()) }
-func Greatest(f Expr, v Expr) Expr          { return rawExpr("GREATEST(" + f.String() + ", " + v.String() + ")") }
-func IsNotNull(f Expr) Expr                 { return rawExpr(f.String() + " IS NOT NULL") }
-func IsNull(f Expr) Expr                    { return rawExpr(f.String() + " IS NULL") }
-func Lag(v Expr) Expr                       { return rawExpr("LAG(" + v.String() + ")") }
-func Lead(v Expr) Expr                      { return rawExpr("LEAD(" + v.String() + ")") }
-func LessThan(f Expr, v Expr) Expr          { return rawExpr(f.String() + " < " + v.String()) }
-func Not(f Expr) Expr                       { return rawExpr("NOT " + f.String()) }
-func NotEqual(f Expr, v Expr) Expr          { return rawExpr(f.String() + " != " + v.String()) }
-func NotInSubquery(f Expr, q Query) Expr    { return rawExpr(f.String() + " NOT IN (" + q.String() + ")") }
-func Or(v ...Expr) Expr                     { return braces(v, " OR ") }
-func Over(v ...interface{}) Expr            { return rawExpr("OVER (" + Raw(v...).String() + ")") }
-func Sub(f Expr, v Expr) Expr               { return rawExpr("(" + f.String() + " - " + v.String() + ")") }
-func Subquery(q Query) Expr                 { return rawExpr("(" + q.Query() + ")") }
-func Sum(v Expr) Expr                       { return rawExpr("SUM(" + v.String() + ")") }
+func Greatest(f Expr, v Expr) Expr {
+	return rawExpr("GREATEST(" + f.String() + ", " + v.String() + ")")
+}
+func IsNotNull(f Expr) Expr              { return rawExpr(f.String() + " IS NOT NULL") }
+func IsNull(f Expr) Expr                 { return rawExpr(f.String() + " IS NULL") }
+func Lag(v Expr) Expr                    { return rawExpr("LAG(" + v.String() + ")") }
+func Lead(v Expr) Expr                   { return rawExpr("LEAD(" + v.String() + ")") }
+func LessThan(f Expr, v Expr) Expr       { return rawExpr(f.String() + " < " + v.String()) }
+func Not(f Expr) Expr                    { return rawExpr("NOT " + f.String()) }
+func NotEqual(f Expr, v Expr) Expr       { return rawExpr(f.String() + " != " + v.String()) }
+func NotInSubquery(f Expr, q Query) Expr { return rawExpr(f.String() + " NOT IN (" + q.String() + ")") }
+func Or(v ...Expr) Expr                  { return braces(v, " OR ") }
+func Over(v ...interface{}) Expr         { return rawExpr("OVER (" + Raw(v...).String() + ")") }
+func Sub(f Expr, v Expr) Expr            { return rawExpr("(" + f.String() + " - " + v.String() + ")") }
+func Subquery(q Query) Expr              { return rawExpr("(" + q.Query() + ")") }
+func Sum(v Expr) Expr                    { return rawExpr("SUM(" + v.String() + ")") }
 
 func Raw(v ...interface{}) Expr {
 	if len(v) == 1 {
@@ -74,6 +76,19 @@ func notAny(f Expr, v ArrayMask) Expr {
 
 var bracesMaxSize int
 
+func Concat(v ...Expr) Expr {
+	switch len(v) {
+	case 0:
+		return rawExpr("")
+	case 1:
+		return v[0]
+	default:
+		var b strings.Builder
+		joinExpr(&b, v, " || ' ' || ")
+		return rawExpr(b.String())
+	}
+}
+
 func braces(v []Expr, sep string) Expr {
 	switch len(v) {
 	case 0:
@@ -92,6 +107,17 @@ func braces(v []Expr, sep string) Expr {
 
 func ToTsVector(lang string, f Expr) TsVector {
 	return TsVector(fmt.Sprintf("to_tsvector('%s', %s)", lang, f))
+}
+
+func DoTsQuery(lang string, arg Expr, plainTo bool) TsQuery {
+	if plainTo {
+		return PlainToTsQuery(lang, arg)
+	}
+	return ToTsQuery(lang, arg)
+}
+
+func ToTsQuery(lang string, arg Expr) TsQuery {
+	return TsQuery(fmt.Sprintf("to_tsquery('%s', %s)", lang, arg))
 }
 
 func PlainToTsQuery(lang string, arg Expr) TsQuery {
