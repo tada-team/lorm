@@ -1,7 +1,6 @@
 package op
 
 import (
-	"log"
 	"testing"
 )
 
@@ -50,15 +49,17 @@ func BenchmarkQuery(b *testing.B) {
 	}
 }
 
-func TestQueryTest(t *testing.T) {
+func TestSelect(t *testing.T) {
 	t.Run("test SelectQuery constructor", func(t *testing.T) {
-		query := Select().Where(
+		query := Select(Wildcard).From(
+			tableAlias{name: "xxx"},
+		).Where(
 			Raw("A"),
 			Raw("B"),
 			Raw("C"),
 			Raw("D"),
 		)
-		answer := Raw("SELECT (A AND B AND C AND D)")
+		answer := Raw("SELECT * FROM xxx WHERE (A AND B AND C AND D)")
 		if query.String() != answer.String() {
 			t.Error("Wrong. want:", answer, "got:", query.String())
 		}
@@ -71,7 +72,6 @@ func TestQueryTest(t *testing.T) {
 			Raw("C"),
 			Raw("D"),
 		)
-		log.Println("RESULT ", raw)
 		answer := rawQuery("A B C D")
 		if raw != answer {
 			t.Error("Wrong. want:", answer, "got:", raw)

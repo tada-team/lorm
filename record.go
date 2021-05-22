@@ -9,7 +9,6 @@ type Record interface {
 	PkCond(args *op.Args) op.Expr
 	NewPk()
 	Save() error
-	//table() op.Table
 }
 
 type Deletable interface {

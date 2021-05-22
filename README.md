@@ -136,7 +136,7 @@ query := op.Select(
     UserTable,
 ).OrderBy(
     UserTable.Created(),
-).Where( // where arguments concatenated with "AND" statement
+).Where( // .Where() arguments concatenated with "AND" statement
     UserTable.Created().Gt(args.Next(time.Now().Add(-time.Hour))),
     op.Or(
         UserTable.IsArchive(),        
@@ -155,6 +155,17 @@ query := op.Select(
 ).Limit(
     args.Next(10),
 )
+```
+
+```go
+args := op.NewArgs()
+query := op.Insert(t, op.Set{
+    op.Column("date"): op.Raw("CURRENT_DATE"),
+    op.Column("value"): args.Next(1),
+}, op.Set{
+    op.Column("date"): op.Raw("CURRENT_DATE"),
+    op.Column("value"): args.Next(2),
+})
 ```
 
 ### Transactions

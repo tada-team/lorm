@@ -1,7 +1,6 @@
 package op
 
 import (
-	"fmt"
 	"log"
 	"strings"
 )
@@ -27,13 +26,13 @@ import (
 //              [ WHERE condition ]
 type insertQuery struct {
 	table      Table
-	kv         Set
+	kvs        []Set
 	onConflict string
 	returning  string
 }
 
-func Insert(s Table, kv Set) insertQuery {
-	return insertQuery{table: s, kv: kv}
+func Insert(s Table, kvs ...Set) insertQuery {
+	return insertQuery{table: s, kvs: kvs}
 }
 
 func (q insertQuery) Returning(v ...Column) insertQuery {
@@ -57,27 +56,53 @@ func (q insertQuery) OnConflictDoNothing() insertQuery {
 
 func (q insertQuery) String() string { return q.Query() }
 
+var insertQueryMaxSize = 200
+
 func (q insertQuery) Query() string {
-	if len(q.kv) == 0 {
+	if len(q.kvs) == 0 {
 		log.Panicln("invalid insertQuery:", q)
 	}
 
-	names := make([]string, 0)
-	values := make([]string, 0)
-	for _, v := range q.kv.SortedItems() {
-		names = append(names, v.Column.BareName().String())
-		values = append(values, v.Expr.String())
+	//items := q.kv.SortedItems()
+
+	var b strings.Builder
+	b.Grow(insertQueryMaxSize)
+
+	b.WriteString("INSERT INTO ")
+	b.WriteString(q.table.String())
+
+	b.WriteString(" (")
+	for i, item := range q.kvs[0].SortedItems() {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteString(item.Column.BareName().String())
+	}
+	b.WriteString(") VALUES ")
+	for j, kv := range q.kvs {
+		if j > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteString("(")
+		items := kv.SortedItems()
+		for i, item := range items {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+			b.WriteString(item.Expr.String())
+		}
+		b.WriteString(")")
 	}
 
-	res := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", q.table, strings.Join(names, ", "), strings.Join(values, ", "))
-
 	if q.onConflict != "" {
-		res = fmt.Sprintf("%s %s", res, q.onConflict)
+		b.WriteString(" ")
+		b.WriteString(q.onConflict)
 	}
 
 	if q.returning != "" {
-		res = fmt.Sprintf("%s RETURNING %s", res, q.returning)
+		b.WriteString(" RETURNING ")
+		b.WriteString(q.returning)
 	}
 
-	return res
+	return maybeGrow(b.String(), &insertQueryMaxSize)
 }
