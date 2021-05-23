@@ -84,8 +84,7 @@ func (q insertQuery) Query() string {
 			b.WriteString(", ")
 		}
 		b.WriteString("(")
-		items := kv.SortedItems()
-		for i, item := range items {
+		for i, item := range kv.SortedItems() {
 			if i > 0 {
 				b.WriteString(", ")
 			}

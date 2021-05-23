@@ -1,9 +1,7 @@
 package op
 
 import (
-	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -34,19 +32,9 @@ func (s Set) SortedItems() []setItem {
 		})
 	}
 	sort.Slice(l, func(i, j int) bool {
-		return toInt(l[i].Expr) < toInt(l[j].Expr)
+		return l[i].Column < l[j].Column
 	})
 	return l
-}
-
-func toInt(s fmt.Stringer) int {
-	if strings.HasPrefix(s.String(), "$") {
-		v, err := strconv.Atoi(s.String()[1:])
-		if err == nil {
-			return v
-		}
-	}
-	return 0
 }
 
 func (s Set) String() string {
