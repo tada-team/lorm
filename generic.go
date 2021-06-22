@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+
 	"github.com/tada-team/lorm/op"
 )
 
@@ -43,19 +44,28 @@ func DoExists(f Filter, table op.Table) bool {
 	return res
 }
 
-func DoSaveall(err error, r Record, t op.Table) error {
-	if err != nil {
+func DoSave(r Record, t op.Table, preSave, postSave func() error) error {
+	if err := preSave(); err != nil {
 		return err
 	}
-	if !r.HasPk() {
-		return DoInsert(r, t)
+	if r.HasPk() {
+		if err := DoUpdate(r, t); err != nil {
+			return err
+		}
+	} else {
+		if err := DoInsert(r, t); err != nil {
+			return err
+		}
 	}
-	return DoUpdate(r, t)
+	if err := postSave(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func DoUpdate(r Record, t op.Table) error {
-	kv := make(op.Set)
 	values := r.GetAllFields()
+	kv := make(op.Set, len(values) - 1)
 	args := op.NewArgs()
 	for i, f := range t.GetAllFields() {
 		if f.BareName() != t.Pk().BareName() {
@@ -71,8 +81,8 @@ func DoInsert(r Record, t op.Table) error {
 	if !r.HasPk() {
 		r.NewPk() // uuid or other custom type generation
 	}
-	kv := make(op.Set)
 	values := r.GetAllFields()
+	kv := make(op.Set, len(values))
 	args := op.NewArgs()
 	pkName := t.Pk().BareName()
 	pkIdx := 0
