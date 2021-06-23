@@ -9,6 +9,8 @@ type Record interface {
 	PkCond(args *op.Args) op.Expr
 	NewPk()
 	Save() error
+	PreSave() error
+	PostSave() error
 }
 
 type Deletable interface {

@@ -15,27 +15,36 @@ type Transactional interface {
 	SetTx(tx *Tx)
 }
 
-type BaseTransactional struct{ tx *Tx }
+type BaseTransactional struct {
+	tx       *Tx
+	postSave func() error
+}
 
-func (t BaseTransactional) Tx() *Tx       { return t.tx }
-func (t *BaseTransactional) SetTx(tx *Tx) { t.tx = tx }
+func (t BaseTransactional) Tx() *Tx { return t.tx }
+
+func (t *BaseTransactional) SetTx(tx *Tx, postSave func() error) {
+	t.tx = tx
+	t.postSave = postSave
+}
+
+func NewTx(tx *sql.Tx, num int64) *Tx {
+	return &Tx{Tx: tx, num: num}
+}
 
 type Tx struct {
 	*sql.Tx
-	num     int64
-	objects []Transactional
+	num       int64
+	objects   []Transactional
+	onSuccess []func() error
 }
 
 func (tx Tx) String() string {
 	return fmt.Sprintf("[tx:%d]", tx.num)
 }
 
-func NewTx(tx *sql.Tx, num int64) *Tx {
-	return &Tx{
-		Tx:      tx,
-		num:     num,
-		objects: make([]Transactional, 0),
-	}
+func (tx *Tx) OnSuccess(fn func() error) error {
+	tx.onSuccess = append(tx.onSuccess, fn)
+	return nil
 }
 
 func (tx *Tx) Add(t Transactional) {
@@ -93,6 +102,13 @@ func Atomic(fn func(tx *Tx) error) error {
 			time.Since(start).Truncate(time.Millisecond),
 		)
 	}
+
+	for _, fn := range tx.onSuccess {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+	tx.onSuccess = nil
 
 	return nil
 }

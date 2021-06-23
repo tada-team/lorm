@@ -44,23 +44,11 @@ func DoExists(f Filter, table op.Table) bool {
 	return res
 }
 
-func DoSave(r Record, t op.Table, preSave, postSave func() error) error {
-	if err := preSave(); err != nil {
-		return err
-	}
+func DoSave(r Record, t op.Table) error {
 	if r.HasPk() {
-		if err := DoUpdate(r, t); err != nil {
-			return err
-		}
-	} else {
-		if err := DoInsert(r, t); err != nil {
-			return err
-		}
+		return DoUpdate(r, t)
 	}
-	if err := postSave(); err != nil {
-		return err
-	}
-	return nil
+	return DoInsert(r, t)
 }
 
 func DoUpdate(r Record, t op.Table) error {
@@ -73,11 +61,19 @@ func DoUpdate(r Record, t op.Table) error {
 		}
 	}
 	query := op.Update(t, kv).Where(r.PkCond(&args))
-	_, err := TxExec(r.Tx(), query, args)
-	return err
+	if _, err := TxExec(r.Tx(), query, args); err != nil {
+		return err
+	}
+	if err := r.PostSave(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func DoInsert(r Record, t op.Table) error {
+	if err := r.PreSave(); err != nil {
+		return err
+	}
 	if !r.HasPk() {
 		r.NewPk() // uuid or other custom type generation
 	}
@@ -101,6 +97,9 @@ func DoInsert(r Record, t op.Table) error {
 	}
 	if !r.HasPk() {
 		return errors.New("programming error: no pk after insert")
+	}
+	if err := r.PostSave(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -140,15 +139,6 @@ func DoReload(r Record, t op.Table) error {
 		return ReloadError
 	}
 	return err
-}
-
-func noop() error { return nil }
-
-func DoFn(isNull bool, res func() error) func() error {
-	if isNull {
-		return noop
-	}
-	return res
 }
 
 type HasPk interface {
