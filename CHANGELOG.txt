@@ -1,3 +1,6 @@
+v0.8.1
+ * lorm.DoFn() shortcut
+
 v0.8.0
  * lorm.DoSaveall() renamed to lorm.DoSave()
  * postSave() hook for save and update operations

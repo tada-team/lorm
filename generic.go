@@ -142,6 +142,15 @@ func DoReload(r Record, t op.Table) error {
 	return err
 }
 
+func noop() error { return nil }
+
+func DoFn(isNull bool, res func() error) func() error {
+	if isNull {
+		return noop
+	}
+	return res
+}
+
 type HasPk interface {
 	HasPk() bool
 }
