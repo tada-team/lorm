@@ -15,17 +15,11 @@ type Transactional interface {
 	SetTx(tx *Tx)
 }
 
-type BaseTransactional struct {
-	tx       *Tx
-	postSave func() error
-}
+type BaseTransactional struct { tx *Tx }
 
 func (t BaseTransactional) Tx() *Tx { return t.tx }
 
-func (t *BaseTransactional) SetTx(tx *Tx, postSave func() error) {
-	t.tx = tx
-	t.postSave = postSave
-}
+func (t *BaseTransactional) SetTx(tx *Tx) { t.tx = tx }
 
 func NewTx(tx *sql.Tx, num int64) *Tx {
 	return &Tx{Tx: tx, num: num}
