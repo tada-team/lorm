@@ -52,6 +52,9 @@ func DoSave(r Record, t op.Table) error {
 }
 
 func DoUpdate(r Record, t op.Table) error {
+	if err := r.PreSave(); err != nil {
+		return err
+	}
 	values := r.GetAllFields()
 	kv := make(op.Set, len(values) - 1)
 	args := op.NewArgs()

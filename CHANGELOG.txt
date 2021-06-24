@@ -1,3 +1,6 @@
+v0.9.2
+ * PreSave() on update
+
 v0.9.1
  * SetTx() fix
 
