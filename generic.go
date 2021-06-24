@@ -56,7 +56,7 @@ func DoUpdate(r Record, t op.Table) error {
 		return err
 	}
 	values := r.GetAllFields()
-	kv := make(op.Set, len(values) - 1)
+	kv := make(op.Set, len(values)-1)
 	args := op.NewArgs()
 	for i, f := range t.GetAllFields() {
 		if f.BareName() != t.Pk().BareName() {
@@ -105,6 +105,13 @@ func DoInsert(r Record, t op.Table) error {
 		return err
 	}
 	return nil
+}
+
+func DoInTx(r Record, fn func() error) error {
+	if tx := r.Tx(); tx != nil {
+		return tx.OnSuccess(fn)
+	}
+	return fn()
 }
 
 func DoDelete(r Record, t op.Table) error {
