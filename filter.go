@@ -1,8 +1,6 @@
 package lorm
 
-import (
-	"github.com/tada-team/lorm/op"
-)
+import "github.com/tada-team/lorm/op"
 
 type Filter interface {
 	Transactional
@@ -44,19 +42,3 @@ func (f *BaseFilter) SetLock(tx *Tx, lock op.Lock) { f.SetTx(tx); f.lock = lock 
 
 // C = condition
 func (f *BaseFilter) C(v op.Expr) { f.Conds.Add(v) }
-
-// EC = empty condition
-func (f *BaseFilter) EC(empty bool, v op.Expr) {
-	if empty {
-		f.SetEmpty()
-	} else {
-		f.Conds.Add(v)
-	}
-}
-
-// MC = maybe condition
-func (f *BaseFilter) MC(apply bool, v op.Expr) {
-	if apply {
-		f.Conds.Add(v)
-	}
-}
