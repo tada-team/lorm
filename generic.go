@@ -114,6 +114,26 @@ func DoInTx(r Record, fn func() error) error {
 	return fn()
 }
 
+func DoListTx(l List) *Tx {
+	byTx := make(map[*Tx]struct{}, 1)
+	for _, r := range l.Records() {
+		byTx[r.Tx()] = struct{}{}
+	}
+	if len(byTx) > 1 {
+		log.Panicln("invalid transaction number:", len(byTx))
+	}
+	for tx := range byTx {
+		return tx
+	}
+	return nil
+}
+
+func DoSetListTx(tx *Tx, l List) {
+	for _, r := range l.Records() {
+		r.SetTx(tx)
+	}
+}
+
 func DoDelete(r Record, t op.Table) error {
 	args := op.NewArgs()
 	query := op.Delete(t).Where(r.PkCond(&args))

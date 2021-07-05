@@ -1,3 +1,7 @@
+v0.10.0
+ * lorm.DoListTx / lorm.DoSetListTx shortcuts
+ * lorm.List interface
+
 v0.9.5
  * pq v1.10.2
 
