@@ -42,3 +42,9 @@ func (f *BaseFilter) SetLock(tx *Tx, lock op.Lock) { f.SetTx(tx); f.lock = lock 
 
 // C = condition
 func (f *BaseFilter) C(v op.Expr) { f.Conds.Add(v) }
+
+// N = next
+func (f *BaseFilter) N(v interface{}) op.Placeholder { return f.Args.Next(v) }
+
+// NA = next array
+func (f *BaseFilter) NA(v interface{}) op.ArrayMask { return f.Args.NextArray(v) }
