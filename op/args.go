@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"github.com/lib/pq"
 )
 
-var argsMaxSize int
+var argsMaxSize int32
 
 type Args []interface{}
 
@@ -16,7 +17,7 @@ func NewArgs() Args { return make(Args, 0, 8) }
 
 func (args Args) String() string {
 	var b strings.Builder
-	b.Grow(argsMaxSize)
+	b.Grow(int(atomic.LoadInt32(&argsMaxSize)))
 	b.WriteString("sqlargs{")
 	for i, v := range args {
 		if i > 0 {

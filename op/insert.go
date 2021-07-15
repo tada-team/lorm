@@ -3,6 +3,7 @@ package op
 import (
 	"log"
 	"strings"
+	"sync/atomic"
 )
 
 // [ WITH [ RECURSIVE ] with_query [, ...] ]
@@ -56,17 +57,15 @@ func (q insertQuery) OnConflictDoNothing() insertQuery {
 
 func (q insertQuery) String() string { return q.Query() }
 
-var insertQueryMaxSize = 200
+var insertQueryMaxSize int32 = 200
 
 func (q insertQuery) Query() string {
 	if len(q.kvs) == 0 {
 		log.Panicln("invalid insertQuery:", q)
 	}
 
-	//items := q.kv.SortedItems()
-
 	var b strings.Builder
-	b.Grow(insertQueryMaxSize)
+	b.Grow(int(atomic.LoadInt32(&insertQueryMaxSize)))
 
 	b.WriteString("INSERT INTO ")
 	b.WriteString(q.table.String())

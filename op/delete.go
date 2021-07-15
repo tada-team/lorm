@@ -2,6 +2,7 @@ package op
 
 import (
 	"strings"
+	"sync/atomic"
 )
 
 // [ WITH [ RECURSIVE ] with_query [, ...] ]
@@ -38,11 +39,11 @@ func (q deleteQuery) Returning(v Expr) deleteQuery {
 
 func (q deleteQuery) String() string { return q.Query() }
 
-var deleteQueryMaxSize = 16
+var deleteQueryMaxSize int32 = 16
 
 func (q deleteQuery) Query() string {
 	var b strings.Builder
-	b.Grow(deleteQueryMaxSize)
+	b.Grow(int(atomic.LoadInt32(&deleteQueryMaxSize)))
 
 	b.WriteString("DELETE FROM ")
 	b.WriteString(q.table.String())

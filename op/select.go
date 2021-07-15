@@ -5,13 +5,14 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"github.com/pkg/errors"
 )
 
 type Lock string
 
-var selectQueryMaxSize = 16
+var selectQueryMaxSize int32 = 16
 
 const (
 	ForUpdate      = Lock("FOR UPDATE")
@@ -116,7 +117,7 @@ func (q SelectQuery) Query() string {
 	}
 
 	var b strings.Builder
-	b.Grow(selectQueryMaxSize)
+	b.Grow(int(atomic.LoadInt32(&selectQueryMaxSize)))
 
 	b.WriteString("SELECT ")
 	joinExpr(&b, q.expressions, ", ")

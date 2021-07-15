@@ -3,6 +3,7 @@ package op
 import (
 	"fmt"
 	"strings"
+	"sync/atomic"
 )
 
 var escapeSpecialReplacer = strings.NewReplacer(
@@ -74,7 +75,7 @@ func notAny(f Expr, v ArrayMask) Expr {
 	return rawExpr("NOT " + f.String() + " = ANY(" + string(v) + ")")
 }
 
-var bracesMaxSize int
+var bracesMaxSize int32
 
 func Concat(v ...Expr) Expr {
 	switch len(v) {
@@ -97,7 +98,7 @@ func braces(v []Expr, sep string) Expr {
 		return v[0]
 	default:
 		var b strings.Builder
-		b.Grow(bracesMaxSize)
+		b.Grow(int(atomic.LoadInt32(&bracesMaxSize)))
 		b.WriteString("(")
 		joinExpr(&b, v, sep)
 		b.WriteString(")")
