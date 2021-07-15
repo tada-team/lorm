@@ -1,3 +1,6 @@
+v0.10.3
+ * reduce races
+
 v0.10.2
  * BaseFilter.N() / BaseFilter.NA() shortcuts
 

@@ -35,8 +35,7 @@ func CacheUsed(name string) {
 }
 
 func trackQuery(tx *Tx, q string, v op.Args) func() {
-	atomic.AddInt64(&qNum, 1)
-	num := qNum
+	num := atomic.AddInt64(&qNum, 1)
 	for _, fn := range beforeQueryHandlers {
 		fn(tx, num, q, v)
 	}
