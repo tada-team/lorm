@@ -1,3 +1,6 @@
+v0.10.6
+ * reduce races
+
 v0.10.5
  * reduce races
 

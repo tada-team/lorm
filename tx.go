@@ -56,13 +56,14 @@ var txNum int64
 
 func Atomic(fn func(tx *Tx) error) error {
 	start := time.Now()
-	atomic.AddInt64(&txNum, 1)
+
+	currentTxNum := atomic.AddInt64(&txNum, 1)
 	sqlTx, txErr := conn.Begin()
 	if txErr != nil {
-		return errors.Wrapf(txErr, "[tx:%d] begin failed", txNum)
+		return errors.Wrapf(txErr, "[tx:%d] begin failed", currentTxNum)
 	}
 
-	tx := NewTx(sqlTx, txNum)
+	tx := NewTx(sqlTx, currentTxNum)
 	if ShowSql {
 		log.Printf("%s begin: %s", tx, breadcrumb())
 	}
