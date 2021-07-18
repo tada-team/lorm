@@ -1,3 +1,6 @@
+v0.10.7
+ * fix race in QueryCounter()
+
 v0.10.6
  * reduce races
 

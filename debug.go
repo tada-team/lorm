@@ -23,7 +23,7 @@ var (
 	cacheUsedHandlers   []cacheUsedHandler
 )
 
-func QueryCounter() int64               { return qNum }
+func QueryCounter() int64               { return atomic.LoadInt64(&qNum) }
 func BeforeQuery(fn beforeQueryHandler) { beforeQueryHandlers = append(beforeQueryHandlers, fn) }
 func AfterQuery(fn afterQueryHandler)   { afterQueryHandlers = append(afterQueryHandlers, fn) }
 func OnCacheUsed(fn cacheUsedHandler)   { cacheUsedHandlers = append(cacheUsedHandlers, fn) }
