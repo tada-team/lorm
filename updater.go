@@ -31,7 +31,7 @@ func (u *BaseUpdater) DoSave(r Record, t op.Table) error {
 	}
 
 	query := op.Update(t, kv).Where(r.PkCond(&args))
-	if _, err := TxExec(r.Tx(), query, args); err != nil {
+	if _, err := TxExec(r.Tx(), r, query, args); err != nil {
 		return err
 	}
 

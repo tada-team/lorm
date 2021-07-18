@@ -2,12 +2,19 @@ package lorm
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/tada-team/lorm/op"
 )
 
+type BaseRecord struct {
+	BaseTransactional
+	sync.RWMutex
+}
+
 type Record interface {
 	Transactional
+	sync.Locker
 	fmt.Stringer
 	GetAllFields() []interface{}
 	HasPk() bool

@@ -2,8 +2,8 @@ package lorm
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
+	"strconv"
 	"sync/atomic"
 	"time"
 
@@ -15,9 +15,9 @@ type Transactional interface {
 	SetTx(tx *Tx)
 }
 
-type BaseTransactional struct { tx *Tx }
+type BaseTransactional struct{ tx *Tx }
 
-func (t BaseTransactional) Tx() *Tx { return t.tx }
+func (t *BaseTransactional) Tx() *Tx { return t.tx }
 
 func (t *BaseTransactional) SetTx(tx *Tx) { t.tx = tx }
 
@@ -32,8 +32,8 @@ type Tx struct {
 	onSuccess []func() error
 }
 
-func (tx Tx) String() string {
-	return fmt.Sprintf("[tx:%d]", tx.num)
+func (tx *Tx) String() string {
+	return "[tx:" + strconv.FormatInt(tx.num, 10) + "]"
 }
 
 func (tx *Tx) OnSuccess(fn func() error) error {
@@ -46,7 +46,7 @@ func (tx *Tx) Add(t Transactional) {
 		if current == t.Tx() {
 			return
 		}
-		log.Panicln("switchTx() already in transaction!")
+		log.Panicln("already in transaction!")
 	}
 	t.SetTx(tx)
 	tx.objects = append(tx.objects, t)
@@ -60,12 +60,12 @@ func Atomic(fn func(tx *Tx) error) error {
 	currentTxNum := atomic.AddInt64(&txNum, 1)
 	sqlTx, txErr := conn.Begin()
 	if txErr != nil {
-		return errors.Wrapf(txErr, "[tx:%d] begin failed", currentTxNum)
+		return errors.Wrapf(txErr, "[tx:"+strconv.FormatInt(currentTxNum, 10)+"] begin failed")
 	}
 
 	tx := NewTx(sqlTx, currentTxNum)
 	if ShowSql {
-		log.Printf("%s begin: %s", tx, breadcrumb())
+		log.Println(tx.String() + "begin:" + breadcrumb())
 	}
 
 	err := fn(tx)
@@ -76,17 +76,17 @@ func Atomic(fn func(tx *Tx) error) error {
 
 	if err != nil {
 		if ShowSql {
-			log.Printf("%s rollback: %s", tx, err)
+			log.Println(tx.String(), "rollback:", err.Error())
 		}
 		if err := tx.Rollback(); err != nil {
-			return errors.Wrapf(err, "%s rollback failed", tx)
+			return errors.Wrapf(err, tx.String()+" rollback failed")
 		}
 		return err
 	}
 
 	startCommit := time.Now()
 	if err := tx.Commit(); err != nil {
-		return errors.Wrapf(err, "%s commit failed", tx)
+		return errors.Wrapf(err, tx.String()+" commit failed")
 	}
 
 	if ShowSql {
