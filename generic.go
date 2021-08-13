@@ -5,15 +5,13 @@ import (
 	"log"
 	"sync"
 
+	"github.com/bradleypeabody/gouuidv6"
 	"github.com/pkg/errors"
-	uuid6 "github.com/uuid6/uuid6go-proto"
+
 	"github.com/tada-team/lorm/op"
 )
 
-// https://habr.com/ru/post/572700/
-var gen uuid6.UUIDv7Generator
-
-func UUID() string { return gen.Next().ToString() }
+func UUID() string { return gouuidv6.New().String() }
 
 func DoCount(f Filter, table op.Table) int {
 	var res int
