@@ -93,8 +93,8 @@ func Atomic(fn func(tx *Tx) error) error {
 		log.Printf(
 			"%s commit (%s) total transaction: %s",
 			tx,
-			time.Since(startCommit).Truncate(time.Millisecond),
-			time.Since(start).Truncate(time.Millisecond),
+			time.Since(startCommit).Round(time.Millisecond),
+			time.Since(start).Round(time.Millisecond),
 		)
 	}
 

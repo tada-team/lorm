@@ -1,10 +1,6 @@
 package lorm
 
-import (
-	"testing"
-
-	"github.com/google/uuid"
-)
+import "testing"
 
 type (
 	uid string
@@ -29,7 +25,7 @@ func TestIsEmpty(t *testing.T) {
 		"int":   1,
 		"int64": int64(1),
 		"str":   "123",
-		"uid":   uid(uuid.New().String()),
+		"uid":   uid(UUID()),
 		"pk":    pk(-1),
 	} {
 		t.Run(k, func(t *testing.T) {

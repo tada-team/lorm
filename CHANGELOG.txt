@@ -1,3 +1,6 @@
+v0.12.0
+ * lorm.UUID() now used UUID v7 from github.com/uuid6/uuid6go-proto
+
 v0.11.0
  * locker in Record (experimental)
 
