@@ -25,18 +25,16 @@ func BenchmarkInsertQuery(b *testing.B) {
 }
 
 func TestInsert(t *testing.T) {
-	idCol := Column("id")
 	ffCol := Column("ff")
+
 	args := NewArgs()
 	q := Insert(tableAlias{name: "xxx"}, Set{
-		idCol: args.Next(1),
 		ffCol: args.Next(2),
 	}, Set{
-		idCol: args.Next(4),
 		ffCol: args.Next(5),
 	})
 
-	want := "INSERT INTO xxx (id, ff) VALUES ($1, $2), ($3, $4)"
+	want := "INSERT INTO xxx (ff) VALUES ($1), ($2)"
 	if v := q.Query(); v != want {
 		t.Fatal("invalid result:", v, "want:", want)
 	}
