@@ -1,4 +1,5 @@
 # lorm
+Django ispired ORM.
 
 ## Install
 
@@ -192,3 +193,10 @@ func ExampleTransaction(i, j int) (int, error) {
     return res, nil
 } 
 ```
+
+### Internal naming
+* `r` — record (row in database)
+* `l` – list of records
+* `t` — table
+* `f` – filter
+* `q` — query
