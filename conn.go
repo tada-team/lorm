@@ -28,3 +28,4 @@ func SetPgxConn(v *pgx.Conn) {
 var disableLocks = false
 
 func DisableLocks() { disableLocks = true }
+func EnableLocks()  { disableLocks = false }

@@ -1,5 +1,5 @@
-v0.12.2
- * experimental lorm.DisableLocks() function
+v0.12.3
+ * experimental lorm.DisableLocks()/lorm.EnableLocks() functions
 
 v0.12.1
  * lorm.UUID() now used UUID v6 from github.com/bradleypeabody/gouuidv6
