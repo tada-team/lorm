@@ -24,7 +24,7 @@ func TxExec(tx *Tx, locker sync.Locker, q op.Query, args op.Args) (res sql.Resul
 	query := q.Query()
 	defer trackQuery(tx, query, args)()
 	err = retry(func() error {
-		res, err = doExec(tx, locker,query, args)
+		res, err = doExec(tx, locker, query, args)
 		return err
 	})
 	return res, err
@@ -82,7 +82,7 @@ func TxScanPgx(locker sync.Locker, q op.Query, args op.Args, dest ...interface{}
 }
 
 func doExec(tx *Tx, locker sync.Locker, query string, args op.Args) (sql.Result, error) {
-	if locker != nil {
+	if locker != nil && !disableLocks {
 		locker.Lock()
 		defer locker.Unlock()
 	}
@@ -93,7 +93,7 @@ func doExec(tx *Tx, locker sync.Locker, query string, args op.Args) (sql.Result,
 }
 
 func doQuery(tx *Tx, locker sync.Locker, query string, args op.Args) (*sql.Rows, error) {
-	if locker != nil {
+	if locker != nil && !disableLocks {
 		locker.Lock()
 		defer locker.Unlock()
 	}
@@ -104,7 +104,7 @@ func doQuery(tx *Tx, locker sync.Locker, query string, args op.Args) (*sql.Rows,
 }
 
 func doQueryPgx(tx pgx.Tx, locker sync.Locker, query string, args op.Args) (pgx.Rows, error) {
-	if locker != nil {
+	if locker != nil && !disableLocks {
 		locker.Lock()
 		defer locker.Unlock()
 	}
@@ -115,7 +115,7 @@ func doQueryPgx(tx pgx.Tx, locker sync.Locker, query string, args op.Args) (pgx.
 }
 
 func doQueryRow(tx *Tx, locker sync.Locker, query string, args op.Args) *sql.Row {
-	if locker != nil {
+	if locker != nil && !disableLocks {
 		locker.Lock()
 		defer locker.Unlock()
 	}
@@ -126,7 +126,7 @@ func doQueryRow(tx *Tx, locker sync.Locker, query string, args op.Args) *sql.Row
 }
 
 func doQueryRowPgx(locker sync.Locker, query string, args op.Args) pgx.Row {
-	if locker != nil {
+	if locker != nil && !disableLocks {
 		locker.Lock()
 		defer locker.Unlock()
 	}

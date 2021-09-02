@@ -24,3 +24,7 @@ func SetConn(v *sql.DB) {
 func SetPgxConn(v *pgx.Conn) {
 	pgxConn = v
 }
+
+var disableLocks = false
+
+func DisableLocks() { disableLocks = true }
