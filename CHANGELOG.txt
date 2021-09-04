@@ -1,3 +1,9 @@
+v0.15.0
+ * lorm.IsCancelingStatementDueToLockTimeout(error)
+ * lorm.IsDuplicateKeyViolatesUniqueConstraint(error)
+ * lorm.IsViolatesForeignKeyConstraint(error)
+ * lorm.IsDeadlockDetected(error)
+
 v0.14.0
  * remove experimental pgx support
 
