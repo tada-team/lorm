@@ -2,8 +2,10 @@ package op
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sync/atomic"
+	"time"
 )
 
 var escapeSpecialReplacer = strings.NewReplacer(
@@ -168,3 +170,8 @@ func List(v ...Expr) Expr {
 func HasPrefix(v string) string { return EscapeSpecialSymbols(v) + "%" }
 func HasSuffix(v string) string { return "%" + EscapeSpecialSymbols(v) }
 func Contains(v string) string  { return "%" + EscapeSpecialSymbols(v) + "%" }
+
+// Interval transform time.Duration into interval representation
+func Interval(dur time.Duration) string {
+	return strconv.Itoa(int(dur.Seconds())) + "s"
+}
