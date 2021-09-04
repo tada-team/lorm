@@ -1,3 +1,6 @@
+v0.14.0
+ * remove experimental pgx support
+
 v0.13.0
  * op.Interval(duration) shortcut
  * op.SetDbParam(tx, arg, value) helper

@@ -1,8 +1,6 @@
 package lorm
 
-import (
-	"github.com/tada-team/lorm/op"
-)
+import "github.com/tada-team/lorm/op"
 
 type BaseUpdater struct {
 	ch op.Changes

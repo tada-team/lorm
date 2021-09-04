@@ -1,8 +1,6 @@
 package lorm
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestBaseTable_AllFieldsExpr(t *testing.T) {
 	table := NewBaseTable("name", "SomeTable", "id", "created")

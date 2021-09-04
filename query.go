@@ -1,14 +1,11 @@
 package lorm
 
 import (
-	"context"
 	"database/sql"
 	"log"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/jackc/pgx/v4"
 
 	"github.com/tada-team/lorm/op"
 )
@@ -49,36 +46,10 @@ func TxQuery(tx *Tx, q op.Query, args op.Args, each func(*sql.Rows) error) error
 	})
 }
 
-func TxQueryPgx(tx pgx.Tx, q op.Query, args op.Args, each func(pgx.Rows) error) (err error) {
-	query := q.Query()
-	defer trackQuery(nil, query, args)()
-	err = retry(func() error {
-		rows, err := doQueryPgx(tx, nil, query, args)
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-		for rows.Next() {
-			err := each(rows)
-			if err != nil {
-				return err
-			}
-		}
-		return rows.Err()
-	})
-	return
-}
-
 func TxScan(tx *Tx, locker sync.Locker, q op.Query, args op.Args, dest ...interface{}) error {
 	query := q.Query()
 	defer trackQuery(tx, query, args)()
 	return retry(func() error { return doQueryRow(tx, locker, query, args).Scan(dest...) })
-}
-
-func TxScanPgx(locker sync.Locker, q op.Query, args op.Args, dest ...interface{}) error {
-	query := q.Query()
-	defer trackQuery(nil, query, args)()
-	return retry(func() error { return doQueryRowPgx(locker, query, args).Scan(dest...) })
 }
 
 func doExec(tx *Tx, locker sync.Locker, query string, args op.Args) (sql.Result, error) {
@@ -103,17 +74,6 @@ func doQuery(tx *Tx, locker sync.Locker, query string, args op.Args) (*sql.Rows,
 	return tx.Query(query, args...)
 }
 
-func doQueryPgx(tx pgx.Tx, locker sync.Locker, query string, args op.Args) (pgx.Rows, error) {
-	if locker != nil && !disableLocks {
-		locker.Lock()
-		defer locker.Unlock()
-	}
-	if tx == nil {
-		return pgxConn.Query(context.Background(), query, args...)
-	}
-	return tx.Query(context.Background(), query, args...)
-}
-
 func doQueryRow(tx *Tx, locker sync.Locker, query string, args op.Args) *sql.Row {
 	if locker != nil && !disableLocks {
 		locker.Lock()
@@ -123,14 +83,6 @@ func doQueryRow(tx *Tx, locker sync.Locker, query string, args op.Args) *sql.Row
 		return conn.QueryRow(query, args...)
 	}
 	return tx.QueryRow(query, args...)
-}
-
-func doQueryRowPgx(locker sync.Locker, query string, args op.Args) pgx.Row {
-	if locker != nil && !disableLocks {
-		locker.Lock()
-		defer locker.Unlock()
-	}
-	return pgxConn.QueryRow(context.Background(), query, args...)
 }
 
 func retry(fn func() error) error {

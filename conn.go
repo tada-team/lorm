@@ -3,13 +3,10 @@ package lorm
 import (
 	"database/sql"
 	"strings"
-
-	"github.com/jackc/pgx/v4"
 )
 
 var (
-	conn    *sql.DB
-	pgxConn *pgx.Conn
+	conn *sql.DB
 )
 
 var (
@@ -22,14 +19,11 @@ func SetConn(v *sql.DB) {
 	conn = v
 }
 
-func SetPgxConn(v *pgx.Conn) {
-	pgxConn = v
-}
-
 var disableLocks = false
 
 func DisableLocks() { disableLocks = true }
-func EnableLocks()  { disableLocks = false }
+
+func EnableLocks() { disableLocks = false }
 
 func SetDbParam(tx *Tx, arg, value string) (err error) {
 	value = strings.ReplaceAll(value, "'", "")
@@ -42,3 +36,4 @@ func SetDbParam(tx *Tx, arg, value string) (err error) {
 	}
 	return
 }
+
