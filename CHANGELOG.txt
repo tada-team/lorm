@@ -1,3 +1,6 @@
+v0.16.0
+ * op.InSubquery()
+
 v0.15.0
  * lorm.IsCancelingStatementDueToLockTimeout(error)
  * lorm.IsDuplicateKeyViolatesUniqueConstraint(error)

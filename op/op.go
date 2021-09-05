@@ -35,6 +35,7 @@ func GreaterThan(f Expr, v Expr) Expr       { return rawExpr(f.String() + " > " 
 func Greatest(f Expr, v Expr) Expr {
 	return rawExpr("GREATEST(" + f.String() + ", " + v.String() + ")")
 }
+func InSubquery(f Expr, q Query) Expr    { return rawExpr(f.String() + " IN (" + q.String() + ")") }
 func IsNotNull(f Expr) Expr              { return rawExpr(f.String() + " IS NOT NULL") }
 func IsNull(f Expr) Expr                 { return rawExpr(f.String() + " IS NULL") }
 func Lag(v Expr) Expr                    { return rawExpr("LAG(" + v.String() + ")") }
