@@ -13,7 +13,7 @@ import (
 
 func UUID() string { return gouuidv6.New().String() }
 
-func DoPks[PK, R interface{ Pk() PK }](l []R) []PK {
+func DoPks[PK iPK, R interface{ Pk() PK }](l []R) []PK {
 	pks := make([]PK, len(l))
 	for i, r := range l {
 		pks[i] = r.Pk()
