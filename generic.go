@@ -13,6 +13,14 @@ import (
 
 func UUID() string { return gouuidv6.New().String() }
 
+func DoPks[PK, R interface{ Pk() PK }](l []R) []PK {
+	pks := make([]PK, len(l))
+	for i, r := range l {
+		pks[i] = r.Pk()
+	}
+	return pks
+}
+
 func DoCount(f Filter, table op.Table) int {
 	var res int
 	if !f.IsEmpty() {

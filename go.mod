@@ -1,6 +1,6 @@
 module github.com/tada-team/lorm
 
-go 1.14
+go 1.18
 
 require (
 	github.com/bradleypeabody/gouuidv6 v0.0.0-20210725191436-99413e4b686d
